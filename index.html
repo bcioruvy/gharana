@@ -18,26 +18,26 @@
 :root {
   --accent:       #4A6FA5;
   --accent-dim:   #3a5a8a;
+  --accent-light: rgba(74,111,165,0.10);
   --danger:       #C0392B;
   --success:      #27AE60;
   --expense-col:  #E05252;
   --received-col: #2ECC71;
-
   --bg:           #F8F8F6;
   --surface:      #FFFFFF;
   --surface2:     #F2F2F0;
   --border:       #E8E8E5;
   --text-primary: #1A1A1A;
   --text-secondary:#6B6B6B;
-  --text-muted:   #A0A0A0;
+  --text-muted:   #A8A8A8;
   --nav-bg:       #FFFFFF;
   --shadow:       0 1px 3px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.04);
   --shadow-lg:    0 4px 20px rgba(0,0,0,0.10);
   --radius:       12px;
   --radius-sm:    8px;
 }
-
 body.dark {
+  --accent-light: rgba(74,111,165,0.18);
   --bg:           #111111;
   --surface:      #1C1C1E;
   --surface2:     #252525;
@@ -52,14 +52,12 @@ body.dark {
 
 /* ── RESET ───────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 html, body {
   height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
   background: var(--bg);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
-  transition: background 0.25s, color 0.25s;
   overflow: hidden;
 }
 
@@ -73,8 +71,24 @@ html, body {
   position: relative;
 }
 
-.screen { display: none; flex: 1; overflow-y: auto; padding-bottom: 80px; }
-.screen.active { display: block; }
+/* screens: all rendered, tabs hidden via visibility to avoid repaint */
+.screen {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  padding-bottom: 80px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(6px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  will-change: opacity, transform;
+  background: var(--bg);
+}
+.screen.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
 
 /* ── AUTH SCREEN ─────────────────────────────────────────── */
 #auth-screen {
@@ -85,8 +99,8 @@ html, body {
   height: 100dvh;
   padding: 40px 32px;
   background: var(--bg);
+  transition: background 0.25s;
 }
-
 .auth-wordmark {
   font-size: 32px;
   font-weight: 300;
@@ -95,14 +109,12 @@ html, body {
   margin-bottom: 8px;
   text-transform: lowercase;
 }
-
 .auth-sub {
   font-size: 13px;
   color: var(--text-muted);
   letter-spacing: 0.04em;
   margin-bottom: 56px;
 }
-
 .auth-btn {
   width: 100%;
   padding: 16px;
@@ -115,39 +127,30 @@ html, body {
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
   letter-spacing: 0.01em;
+  font-family: inherit;
 }
-
 .auth-btn:hover { border-color: var(--accent); background: var(--surface2); }
 
-/* ── TOP BAR ─────────────────────────────────────────────── */
+/* ── TOPBAR ──────────────────────────────────────────────── */
 .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 20px 12px;
+  padding: 18px 20px 10px;
   background: var(--bg);
   position: sticky;
   top: 0;
   z-index: 10;
 }
-
 .topbar-title {
   font-size: 22px;
   font-weight: 600;
   letter-spacing: -0.3px;
-  color: var(--text-primary);
 }
-
 .topbar-right { display: flex; align-items: center; gap: 8px; }
 
 /* ── FILTER BAR ──────────────────────────────────────────── */
-.filter-bar {
-  padding: 0 20px 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
+.filter-bar { padding: 0 20px 12px; display: flex; gap: 8px; }
 .filter-select {
   flex: 1;
   padding: 10px 14px;
@@ -165,21 +168,19 @@ html, body {
   padding-right: 36px;
   cursor: pointer;
 }
-
 .filter-select:focus { outline: none; border-color: var(--accent); }
 
 .month-total {
   font-size: 13px;
   color: var(--text-secondary);
-  padding: 0 20px 16px;
+  padding: 0 20px 14px;
   font-weight: 500;
+  min-height: 20px;
 }
-
 .month-total span { color: var(--text-primary); font-weight: 600; }
 
 /* ── ENTRY LIST ──────────────────────────────────────────── */
 .entry-list { padding: 0 20px; display: flex; flex-direction: column; gap: 10px; }
-
 .entry-card {
   background: var(--surface);
   border-radius: var(--radius);
@@ -189,22 +190,16 @@ html, body {
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  transition: box-shadow 0.2s;
 }
-
-.entry-card:active { box-shadow: var(--shadow-lg); }
-
 .entry-left { flex: 1; min-width: 0; }
-
 .entry-cat {
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-muted);
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
-
 .entry-note {
   font-size: 15px;
   font-weight: 500;
@@ -214,14 +209,13 @@ html, body {
   text-overflow: ellipsis;
   margin-bottom: 4px;
 }
-
 .entry-meta {
   font-size: 12px;
   color: var(--text-muted);
   display: flex;
   gap: 8px;
+  align-items: center;
 }
-
 .badge {
   display: inline-block;
   padding: 2px 7px;
@@ -231,71 +225,60 @@ html, body {
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
-
-.badge-cash { background: #FEF3C7; color: #92400E; }
-.badge-bank { background: #DBEAFE; color: #1E40AF; }
+.badge-cash     { background: #FEF3C7; color: #92400E; }
+.badge-bank     { background: #DBEAFE; color: #1E40AF; }
 .badge-transfer { background: #EDE9FE; color: #5B21B6; }
-.badge-gift { background: #FCE7F3; color: #9D174D; }
-
-body.dark .badge-cash { background: #3D2E08; color: #D97706; }
-body.dark .badge-bank { background: #1E3A5F; color: #60A5FA; }
+.badge-gift     { background: #FCE7F3; color: #9D174D; }
+body.dark .badge-cash     { background: #3D2E08; color: #D97706; }
+body.dark .badge-bank     { background: #1E3A5F; color: #60A5FA; }
 body.dark .badge-transfer { background: #2D1F5E; color: #A78BFA; }
-body.dark .badge-gift { background: #3D1040; color: #F472B6; }
+body.dark .badge-gift     { background: #3D1040; color: #F472B6; }
 
-.entry-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-
+.entry-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
 .entry-amount {
   font-size: 17px;
   font-weight: 700;
   letter-spacing: -0.3px;
   white-space: nowrap;
 }
-
-.amount-expense { color: var(--expense-col); }
+.amount-expense  { color: var(--expense-col); }
 .amount-received { color: var(--received-col); }
-
-.entry-actions { display: flex; gap: 6px; }
-
+.entry-actions { display: flex; gap: 4px; }
 .icon-btn {
   background: none;
   border: none;
   cursor: pointer;
   color: var(--text-muted);
-  font-size: 13px;
-  padding: 4px 6px;
+  font-size: 12px;
+  padding: 4px 7px;
   border-radius: 6px;
   transition: color 0.15s, background 0.15s;
   font-family: inherit;
 }
-
 .icon-btn:hover { color: var(--text-primary); background: var(--surface2); }
 .icon-btn.delete:hover { color: var(--danger); }
 
 /* ── EMPTY STATE ─────────────────────────────────────────── */
-.empty-state {
-  text-align: center;
-  padding: 60px 32px;
-  color: var(--text-muted);
-}
-
+.empty-state { text-align: center; padding: 60px 32px; }
 .empty-state-title { font-size: 15px; font-weight: 500; margin-bottom: 6px; color: var(--text-secondary); }
-.empty-state-sub { font-size: 13px; line-height: 1.5; }
+.empty-state-sub   { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
 
 /* ── FAB ─────────────────────────────────────────────────── */
 .fab {
   position: fixed;
-  bottom: 90px;
-  right: 24px;
+  bottom: 88px;
+  right: 50%;
+  transform: translateX(calc(50% - 216px + 24px));
   width: 52px;
   height: 52px;
   border-radius: 50%;
   background: var(--accent);
   color: #fff;
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 300;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(74, 111, 165, 0.40);
+  box-shadow: 0 4px 16px rgba(74,111,165,0.40);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -303,8 +286,7 @@ body.dark .badge-gift { background: #3D1040; color: #F472B6; }
   z-index: 20;
   line-height: 1;
 }
-
-.fab:active { transform: scale(0.93); }
+.fab:active { transform: translateX(calc(50% - 216px + 24px)) scale(0.93); }
 
 /* ── BOTTOM NAV ──────────────────────────────────────────── */
 .bottom-nav {
@@ -319,8 +301,8 @@ body.dark .badge-gift { background: #3D1040; color: #F472B6; }
   display: flex;
   z-index: 30;
   padding-bottom: env(safe-area-inset-bottom);
+  transition: background 0.25s, border-color 0.25s;
 }
-
 .nav-item {
   flex: 1;
   display: flex;
@@ -336,26 +318,16 @@ body.dark .badge-gift { background: #3D1040; color: #F472B6; }
   transition: color 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
-
 .nav-item.active { color: var(--accent); }
-
 .nav-dot {
-  width: 4px;
-  height: 4px;
+  width: 4px; height: 4px;
   border-radius: 50%;
   background: var(--accent);
   opacity: 0;
   transition: opacity 0.2s;
 }
-
 .nav-item.active .nav-dot { opacity: 1; }
-
-.nav-label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
+.nav-label { font-size: 10px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
 
 /* ── MODAL ───────────────────────────────────────────────── */
 .modal-overlay {
@@ -369,429 +341,290 @@ body.dark .badge-gift { background: #3D1040; color: #F472B6; }
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
-
 .modal-overlay.open { display: flex; }
-
 .modal {
   background: var(--surface);
   border-radius: 20px 20px 0 0;
   padding: 24px 24px 40px;
   width: 100%;
   max-width: 480px;
-  max-height: 90dvh;
+  max-height: 92dvh;
   overflow-y: auto;
-  animation: slideUp 0.25s ease;
+  animation: slideUp 0.22s ease;
 }
-
 @keyframes slideUp {
   from { transform: translateY(40px); opacity: 0; }
   to   { transform: translateY(0);    opacity: 1; }
 }
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 24px;
-}
-
-.modal-title { font-size: 18px; font-weight: 600; letter-spacing: -0.2px; }
-
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+.modal-title  { font-size: 18px; font-weight: 600; letter-spacing: -0.2px; }
 .modal-close {
-  width: 30px;
-  height: 30px;
+  width: 30px; height: 30px;
   border-radius: 50%;
   background: var(--surface2);
-  border: none;
-  cursor: pointer;
+  border: none; cursor: pointer;
   color: var(--text-secondary);
   font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   transition: background 0.15s;
 }
-
 .modal-close:hover { background: var(--border); }
 
 /* ── FORM ────────────────────────────────────────────────── */
 .form-group { margin-bottom: 16px; }
-
 .form-label {
   display: block;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 7px;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: 7px;
 }
-
-.form-input, .form-select, .form-textarea {
+.form-input, .form-select {
   width: 100%;
   padding: 13px 14px;
   border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--surface2);
   color: var(--text-primary);
-  font-size: 15px;
-  font-family: inherit;
+  font-size: 15px; font-family: inherit;
   transition: border-color 0.2s;
-  appearance: none;
-  -webkit-appearance: none;
+  appearance: none; -webkit-appearance: none;
 }
-
-.form-input:focus, .form-select:focus, .form-textarea:focus {
-  outline: none;
-  border-color: var(--accent);
-  background: var(--surface);
-}
-
+.form-input:focus, .form-select:focus { outline: none; border-color: var(--accent); background: var(--surface); }
 .form-select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6B6B' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 14px center;
   padding-right: 36px;
+  cursor: pointer;
 }
-
-.form-textarea { resize: none; height: 80px; }
-
-.toggle-row {
-  display: flex;
-  gap: 8px;
-}
-
+.toggle-row { display: flex; gap: 8px; }
 .toggle-btn {
-  flex: 1;
-  padding: 11px;
+  flex: 1; padding: 11px;
   border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--surface2);
   color: var(--text-secondary);
-  font-size: 14px;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 0.15s;
-  text-align: center;
+  font-size: 14px; font-weight: 500; font-family: inherit;
+  cursor: pointer; transition: all 0.15s; text-align: center;
 }
-
-.toggle-btn.selected {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: var(--surface);
-  font-weight: 600;
-}
-
+.toggle-btn.selected { border-color: var(--accent); color: var(--accent); background: var(--surface); font-weight: 600; }
 .submit-btn {
-  width: 100%;
-  padding: 15px;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius);
-  font-size: 15px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  letter-spacing: 0.01em;
-  margin-top: 8px;
+  width: 100%; padding: 15px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius);
+  font-size: 15px; font-weight: 600; font-family: inherit;
+  cursor: pointer; letter-spacing: 0.01em; margin-top: 8px;
   transition: background 0.15s, transform 0.1s;
 }
+.submit-btn:hover   { background: var(--accent-dim); }
+.submit-btn:active  { transform: scale(0.98); }
 
-.submit-btn:hover { background: var(--accent-dim); }
-.submit-btn:active { transform: scale(0.98); }
+/* ── TOAST ───────────────────────────────────────────────── */
+#toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--text-primary);
+  color: var(--bg);
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+  z-index: 200;
+  white-space: nowrap;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── DASHBOARD ───────────────────────────────────────────── */
+.dash-hero {
+  margin: 8px 20px 0;
+  background: var(--accent);
+  border-radius: 16px;
+  padding: 22px 22px 20px;
+  color: #fff;
+}
+.dash-hero-label { font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; opacity: 0.75; margin-bottom: 6px; }
+.dash-hero-amount { font-size: 34px; font-weight: 700; letter-spacing: -1px; margin-bottom: 4px; }
+.dash-hero-sub { font-size: 13px; opacity: 0.75; }
+
+.dash-row { display: flex; gap: 10px; padding: 10px 20px 0; }
+.dash-stat {
+  flex: 1;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+}
+.dash-stat-label { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+.dash-stat-value { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+.dash-stat-value.expense  { color: var(--expense-col); }
+.dash-stat-value.received { color: var(--received-col); }
+.dash-stat-value.net-pos  { color: var(--received-col); }
+.dash-stat-value.net-neg  { color: var(--expense-col); }
+
+.dash-budget-card {
+  margin: 10px 20px 0;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+.dash-budget-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.dash-budget-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+.dash-budget-pct { font-size: 13px; font-weight: 700; }
+.progress-track {
+  height: 6px; background: var(--surface2);
+  border-radius: 3px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; border-radius: 3px;
+  transition: width 0.5s ease;
+  background: var(--received-col);
+}
+.progress-fill.warning { background: #F39C12; }
+.progress-fill.over    { background: var(--expense-col); }
+.dash-budget-sub { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+
+.dash-section-title {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 16px 20px 8px;
+}
+.dash-recent { padding: 0 20px; display: flex; flex-direction: column; gap: 8px; }
+.dash-month-row {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 13px 16px;
+  box-shadow: var(--shadow);
+}
+.dash-month-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.dash-month-sub  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.dash-month-amt  { font-size: 15px; font-weight: 700; }
 
 /* ── ANALYTICS ───────────────────────────────────────────── */
-.analytics-section {
-  padding: 0 20px;
-  margin-bottom: 24px;
-}
-
+.analytics-section { padding: 0 20px; margin-bottom: 20px; }
 .section-label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 14px;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: 12px;
 }
-
-.chart-card {
-  background: var(--surface);
-  border-radius: var(--radius);
-  padding: 20px;
-  box-shadow: var(--shadow);
-}
-
-.chart-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  margin-bottom: 16px;
-  letter-spacing: 0.01em;
-}
-
-.analytics-month-bar {
-  padding: 14px 20px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+.chart-card { background: var(--surface); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); }
+.chart-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 14px; }
+.analytics-filter-bar { padding: 0 20px 12px; }
 
 /* ── SETTINGS ────────────────────────────────────────────── */
-.settings-section {
-  padding: 0 20px;
-  margin-bottom: 28px;
-}
-
+.settings-section { padding: 0 20px; margin-bottom: 24px; }
 .settings-section-title {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 12px;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: 10px;
 }
-
-.settings-card {
-  background: var(--surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
-
+.settings-card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
 .settings-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 15px 16px;
-  border-bottom: 1px solid var(--border);
-  gap: 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 15px 16px; border-bottom: 1px solid var(--border); gap: 12px;
 }
-
 .settings-row:last-child { border-bottom: none; }
+.settings-row-label { font-size: 15px; font-weight: 500; color: var(--text-primary); }
+.settings-row-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
-.settings-row-label {
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.settings-row-sub {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-top: 2px;
-}
-
-.settings-value {
-  font-size: 14px;
-  color: var(--text-secondary);
-  font-weight: 500;
-}
-
-/* toggle switch */
-.toggle-switch {
-  position: relative;
-  width: 44px;
-  height: 26px;
-  flex-shrink: 0;
-}
-
+.toggle-switch { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
 .toggle-switch input { display: none; }
-
-.toggle-track {
-  position: absolute;
-  inset: 0;
-  background: var(--border);
-  border-radius: 13px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
+.toggle-track { position: absolute; inset: 0; background: var(--border); border-radius: 13px; cursor: pointer; transition: background 0.2s; }
 .toggle-switch input:checked + .toggle-track { background: var(--accent); }
-
-.toggle-thumb {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 20px;
-  height: 20px;
-  background: #fff;
-  border-radius: 50%;
-  transition: transform 0.2s;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-}
-
+.toggle-thumb { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: #fff; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
 .toggle-switch input:checked ~ .toggle-thumb { transform: translateX(18px); }
 
-/* chips list */
-.chip-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-
+.chip-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
 .chip {
-  padding: 6px 12px;
-  border-radius: 20px;
-  background: var(--surface2);
-  border: 1.5px solid var(--border);
-  font-size: 13px;
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  padding: 6px 12px; border-radius: 20px;
+  background: var(--surface2); border: 1.5px solid var(--border);
+  font-size: 13px; color: var(--text-primary);
+  display: flex; align-items: center; gap: 6px;
 }
-
-.chip-del {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: 15px;
-  line-height: 1;
-  padding: 0;
-}
-
+.chip-del { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; line-height: 1; padding: 0; }
 .chip-del:hover { color: var(--danger); }
-
-.add-chip-row {
-  display: flex;
-  gap: 8px;
-  margin-top: 12px;
-}
-
+.add-chip-row { display: flex; gap: 8px; margin-top: 12px; }
 .add-chip-input {
-  flex: 1;
-  padding: 10px 13px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface2);
-  color: var(--text-primary);
-  font-size: 14px;
-  font-family: inherit;
+  flex: 1; padding: 10px 13px;
+  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--surface2); color: var(--text-primary);
+  font-size: 14px; font-family: inherit;
 }
-
-.add-chip-input:focus { outline: none; border-color: var(--accent); background: var(--surface); }
-
+.add-chip-input:focus { outline: none; border-color: var(--accent); }
 .add-chip-btn {
-  padding: 10px 16px;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
+  padding: 10px 16px; background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer;
 }
-
-/* danger btn */
+.budget-inline-edit { display: flex; align-items: center; gap: 8px; }
+.budget-inline-input {
+  width: 110px; padding: 6px 10px;
+  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--surface2); color: var(--text-primary);
+  font-size: 14px; font-family: inherit; text-align: right;
+}
+.budget-inline-input:focus { outline: none; border-color: var(--accent); }
+.budget-save-btn {
+  padding: 7px 13px; background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer;
+}
 .danger-btn {
-  width: 100%;
-  padding: 14px;
-  background: none;
-  border: 1.5px solid var(--danger);
-  color: var(--danger);
-  border-radius: var(--radius);
-  font-size: 15px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background 0.15s;
+  width: 100%; padding: 14px;
+  background: none; border: 1.5px solid var(--danger); color: var(--danger);
+  border-radius: var(--radius); font-size: 15px; font-weight: 600;
+  font-family: inherit; cursor: pointer; transition: background 0.15s;
 }
-
 .danger-btn:hover { background: rgba(192,57,43,0.06); }
 
-/* ── MISC ────────────────────────────────────────────────── */
-.topbar-icon-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 500;
-  font-family: inherit;
-  padding: 6px 10px;
-  border-radius: var(--radius-sm);
-  background: var(--surface2);
-  transition: background 0.15s;
-}
-
-.topbar-icon-btn:hover { background: var(--border); }
-
-.loading-dots {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
-}
-
-.loading-dots span {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--text-muted);
-  animation: pulse 1.2s ease-in-out infinite;
-}
-
+/* ── LOADING ─────────────────────────────────────────────── */
+.loading-dots { display: flex; gap: 6px; align-items: center; justify-content: center; padding: 48px; }
+.loading-dots span { width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); animation: pulse 1.2s ease-in-out infinite; }
 .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
 .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-
 @keyframes pulse {
-  0%, 80%, 100% { opacity: 0.3; transform: scale(0.9); }
-  40% { opacity: 1; transform: scale(1); }
+  0%,80%,100% { opacity: 0.3; transform: scale(0.9); }
+  40%          { opacity: 1;   transform: scale(1); }
 }
 
-.budget-inline-edit {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+@media (max-width: 480px) {
+  .fab { right: 24px; transform: none; }
+  .fab:active { transform: scale(0.93); }
 }
-
-.budget-inline-input {
-  width: 100px;
-  padding: 6px 10px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface2);
-  color: var(--text-primary);
-  font-size: 14px;
-  font-family: inherit;
-  text-align: right;
-}
-
-.budget-inline-input:focus { outline: none; border-color: var(--accent); }
-
-.budget-save-btn {
-  padding: 6px 12px;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-}
-
 </style>
 </head>
 <body>
 
-<!-- AUTH SCREEN -->
+<!-- AUTH -->
 <div id="auth-screen">
   <div class="auth-wordmark">gharana</div>
   <div class="auth-sub">household finance</div>
   <button class="auth-btn" onclick="signIn()">Continue with Google</button>
 </div>
 
-<!-- MAIN APP -->
-<div id="app" style="display:none;">
+<!-- APP -->
+<div id="app" style="display:none; flex-direction:column; height:100dvh;">
 
-  <!-- EXPENSES TAB -->
-  <div id="tab-expenses" class="screen active">
+  <!-- DASHBOARD -->
+  <div id="tab-dashboard" class="screen active">
     <div class="topbar">
-      <div class="topbar-title">Expenses</div>
+      <div class="topbar-title">Overview</div>
     </div>
+    <div id="dash-content">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+
+  <!-- EXPENSES -->
+  <div id="tab-expenses" class="screen">
+    <div class="topbar"><div class="topbar-title">Expenses</div></div>
     <div class="filter-bar">
       <select class="filter-select" id="exp-month-filter" onchange="renderExpenses()">
         <option value="all">All months</option>
@@ -803,11 +636,9 @@ body.dark .badge-gift { background: #3D1040; color: #F472B6; }
     </div>
   </div>
 
-  <!-- RECEIVED TAB -->
+  <!-- RECEIVED -->
   <div id="tab-received" class="screen">
-    <div class="topbar">
-      <div class="topbar-title">Received</div>
-    </div>
+    <div class="topbar"><div class="topbar-title">Received</div></div>
     <div class="filter-bar">
       <select class="filter-select" id="rec-month-filter" onchange="renderReceived()">
         <option value="all">All months</option>
@@ -819,43 +650,36 @@ body.dark .badge-gift { background: #3D1040; color: #F472B6; }
     </div>
   </div>
 
-  <!-- ANALYTICS TAB -->
+  <!-- ANALYTICS -->
   <div id="tab-analytics" class="screen">
-    <div class="topbar">
-      <div class="topbar-title">Analytics</div>
-    </div>
-    <div class="analytics-month-bar">
-      <select class="filter-select" id="analytics-month-filter" onchange="renderAnalytics()" style="flex:1"></select>
+    <div class="topbar"><div class="topbar-title">Analytics</div></div>
+    <div class="analytics-filter-bar">
+      <select class="filter-select" id="analytics-month-filter" onchange="renderAnalytics()"></select>
     </div>
     <div class="analytics-section">
       <div class="section-label">Budget vs Spent</div>
       <div class="chart-card">
-        <div class="chart-title" id="bar-chart-title">This month</div>
+        <div class="chart-title" id="bar-chart-title">—</div>
         <canvas id="bar-chart" height="160"></canvas>
       </div>
     </div>
     <div class="analytics-section">
       <div class="section-label">By Category</div>
-      <div class="chart-card">
+      <div class="chart-card" id="pie-wrapper">
         <canvas id="pie-chart" height="220"></canvas>
       </div>
     </div>
   </div>
 
-  <!-- SETTINGS TAB -->
+  <!-- SETTINGS -->
   <div id="tab-settings" class="screen">
-    <div class="topbar">
-      <div class="topbar-title">Settings</div>
-    </div>
+    <div class="topbar"><div class="topbar-title">Settings</div></div>
     <div style="padding-top:8px;">
-
       <div class="settings-section">
         <div class="settings-section-title">Appearance</div>
         <div class="settings-card">
           <div class="settings-row">
-            <div>
-              <div class="settings-row-label">Dark Mode</div>
-            </div>
+            <div><div class="settings-row-label">Dark Mode</div></div>
             <label class="toggle-switch">
               <input type="checkbox" id="dark-toggle" onchange="toggleDark(this.checked)">
               <div class="toggle-track"></div>
@@ -864,14 +688,13 @@ body.dark .badge-gift { background: #3D1040; color: #F472B6; }
           </div>
         </div>
       </div>
-
       <div class="settings-section">
         <div class="settings-section-title">Budget</div>
         <div class="settings-card">
           <div class="settings-row">
             <div>
               <div class="settings-row-label">Monthly Budget</div>
-              <div class="settings-row-sub">Used in Analytics bar chart</div>
+              <div class="settings-row-sub">Shown in Analytics and Overview</div>
             </div>
             <div class="budget-inline-edit">
               <input class="budget-inline-input" type="number" id="budget-input" placeholder="0" />
@@ -880,71 +703,67 @@ body.dark .badge-gift { background: #3D1040; color: #F472B6; }
           </div>
         </div>
       </div>
-
       <div class="settings-section">
         <div class="settings-section-title">Categories</div>
         <div class="settings-card" style="padding:16px;">
           <div class="chip-list" id="cat-chip-list"></div>
           <div class="add-chip-row">
-            <input class="add-chip-input" type="text" id="new-cat-input" placeholder="Add category..." />
+            <input class="add-chip-input" type="text" id="new-cat-input" placeholder="Add category…" />
             <button class="add-chip-btn" onclick="addCategory()">Add</button>
           </div>
         </div>
       </div>
-
       <div class="settings-section">
         <div class="settings-section-title">Sources</div>
         <div class="settings-card" style="padding:16px;">
           <div class="chip-list" id="src-chip-list"></div>
           <div class="add-chip-row">
-            <input class="add-chip-input" type="text" id="new-src-input" placeholder="Add source..." />
+            <input class="add-chip-input" type="text" id="new-src-input" placeholder="Add source…" />
             <button class="add-chip-btn" onclick="addSource()">Add</button>
           </div>
         </div>
       </div>
-
       <div class="settings-section">
         <div class="settings-section-title">Account</div>
         <div class="settings-card">
           <div class="settings-row">
             <div>
               <div class="settings-row-label" id="user-name-display">—</div>
-              <div class="settings-row-sub" id="user-email-display">—</div>
+              <div class="settings-row-sub"  id="user-email-display">—</div>
             </div>
           </div>
         </div>
       </div>
-
       <div class="settings-section">
         <button class="danger-btn" onclick="signOut()">Sign Out</button>
       </div>
-
     </div>
   </div>
 
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
-    <button class="nav-item active" onclick="switchTab('expenses')" id="nav-expenses">
-      <div class="nav-dot"></div>
-      <div class="nav-label">Expenses</div>
+    <button class="nav-item active" onclick="switchTab('dashboard')" id="nav-dashboard">
+      <div class="nav-dot"></div><div class="nav-label">Overview</div>
+    </button>
+    <button class="nav-item" onclick="switchTab('expenses')" id="nav-expenses">
+      <div class="nav-dot"></div><div class="nav-label">Expenses</div>
     </button>
     <button class="nav-item" onclick="switchTab('received')" id="nav-received">
-      <div class="nav-dot"></div>
-      <div class="nav-label">Received</div>
+      <div class="nav-dot"></div><div class="nav-label">Received</div>
     </button>
     <button class="nav-item" onclick="switchTab('analytics')" id="nav-analytics">
-      <div class="nav-dot"></div>
-      <div class="nav-label">Analytics</div>
+      <div class="nav-dot"></div><div class="nav-label">Analytics</div>
     </button>
     <button class="nav-item" onclick="switchTab('settings')" id="nav-settings">
-      <div class="nav-dot"></div>
-      <div class="nav-label">Settings</div>
+      <div class="nav-dot"></div><div class="nav-label">Settings</div>
     </button>
   </nav>
 
-  <!-- FAB (hidden on analytics/settings) -->
   <button class="fab" id="fab-btn" onclick="openAddModal()">+</button>
 </div>
+
+<!-- TOAST -->
+<div id="toast"></div>
 
 <!-- ADD EXPENSE MODAL -->
 <div class="modal-overlay" id="exp-modal">
@@ -974,7 +793,7 @@ body.dark .badge-gift { background: #3D1040; color: #F472B6; }
       <label class="form-label">Method</label>
       <div class="toggle-row">
         <button class="toggle-btn selected" id="exp-cash-btn" onclick="selectMethod('cash')">Cash</button>
-        <button class="toggle-btn" id="exp-bank-btn" onclick="selectMethod('bank')">Bank</button>
+        <button class="toggle-btn"          id="exp-bank-btn" onclick="selectMethod('bank')">Bank</button>
       </div>
     </div>
     <button class="submit-btn" onclick="saveExpense()">Save Expense</button>
@@ -1005,7 +824,7 @@ body.dark .badge-gift { background: #3D1040; color: #F472B6; }
       <label class="form-label">Type</label>
       <div class="toggle-row">
         <button class="toggle-btn selected" id="rec-transfer-btn" onclick="selectRecType('transfer')">Transfer</button>
-        <button class="toggle-btn" id="rec-gift-btn" onclick="selectRecType('gift')">Gift / Extra</button>
+        <button class="toggle-btn"          id="rec-gift-btn"     onclick="selectRecType('gift')">Gift / Extra</button>
       </div>
     </div>
     <div class="form-group">
@@ -1020,7 +839,7 @@ body.dark .badge-gift { background: #3D1040; color: #F472B6; }
   </div>
 </div>
 
-<!-- DELETE CONFIRM MODAL -->
+<!-- DELETE CONFIRM -->
 <div class="modal-overlay" id="del-modal">
   <div class="modal">
     <div class="modal-header">
@@ -1035,7 +854,7 @@ body.dark .badge-gift { background: #3D1040; color: #F472B6; }
 </div>
 
 <script>
-/* ── FIREBASE CONFIG ─────────────────────────────────────── */
+/* ── FIREBASE ────────────────────────────────────────────── */
 const firebaseConfig = {
   apiKey: "AIzaSyBlNXGwMmp6bRkgZjyhPzGuXvujG4Xa4gM",
   authDomain: "ledger-app-9ca93.firebaseapp.com",
@@ -1044,7 +863,6 @@ const firebaseConfig = {
   messagingSenderId: "993768476078",
   appId: "1:993768476078:web:ddc89badcaa7307773cc3f"
 };
-
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db   = firebase.firestore();
@@ -1056,26 +874,31 @@ let received    = [];
 let categories  = [];
 let sources     = [];
 let budget      = 0;
-let currentTab  = 'expenses';
+let currentTab  = 'dashboard';
 let expMethod   = 'cash';
 let recType     = 'transfer';
 let barChart    = null;
 let pieChart    = null;
+let dataLoaded  = false;
 
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-/* ── HELPERS ─────────────────────────────────────────────── */
-const fmt = n => 'PKR ' + Number(n).toLocaleString('en-PK', {minimumFractionDigits:0, maximumFractionDigits:0});
+/* ── UTILS ───────────────────────────────────────────────── */
+const fmt      = n => 'PKR ' + Number(n).toLocaleString('en-PK', {minimumFractionDigits:0, maximumFractionDigits:0});
 const todayISO = () => new Date().toISOString().split('T')[0];
 const monthKey = iso => iso ? iso.slice(0,7) : '';
+const curMonthKey = () => {
+  const n = new Date();
+  return n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0');
+};
 const monthLabel = key => {
+  if (!key) return '—';
   const [y,m] = key.split('-');
   return MONTH_NAMES[parseInt(m,10)-1] + ' ' + y;
 };
 
 function getMonthKeys(list) {
-  const keys = [...new Set(list.map(e => monthKey(e.date)))].filter(Boolean);
-  return keys.sort((a,b) => b.localeCompare(a));
+  return [...new Set(list.map(e => monthKey(e.date)).filter(Boolean))].sort((a,b) => b.localeCompare(a));
 }
 
 function filterByMonth(list, val) {
@@ -1083,10 +906,26 @@ function filterByMonth(list, val) {
   return list.filter(e => monthKey(e.date) === val);
 }
 
+function formatDate(iso) {
+  if (!iso) return '—';
+  const [y,m,d] = iso.split('-');
+  return `${parseInt(d,10)} ${MONTH_NAMES[parseInt(m,10)-1]} ${y}`;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
 /* ── THEME ───────────────────────────────────────────────── */
 function initTheme() {
-  const saved = localStorage.getItem('gh_dark');
-  const isDark = saved === 'true';
+  const isDark = localStorage.getItem('gh_dark') === 'true';
   document.body.classList.toggle('dark', isDark);
   const tog = document.getElementById('dark-toggle');
   if (tog) tog.checked = isDark;
@@ -1095,18 +934,15 @@ function initTheme() {
 function toggleDark(on) {
   document.body.classList.toggle('dark', on);
   localStorage.setItem('gh_dark', on);
-  if (barChart) renderAnalytics();
+  if (currentTab === 'analytics') renderAnalytics();
 }
 
 /* ── AUTH ────────────────────────────────────────────────── */
 function signIn() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(e => alert('Sign-in failed: ' + e.message));
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+    .catch(e => alert('Sign-in failed: ' + e.message));
 }
-
-function signOut() {
-  auth.signOut();
-}
+function signOut() { auth.signOut(); }
 
 auth.onAuthStateChanged(user => {
   if (user) {
@@ -1124,26 +960,31 @@ auth.onAuthStateChanged(user => {
   }
 });
 
-/* ── FIRESTORE PATHS ─────────────────────────────────────── */
-const uid = () => currentUser.uid;
+/* ── FIRESTORE REFS ──────────────────────────────────────── */
+const uid     = () => currentUser.uid;
 const expRef  = () => db.collection('gh_expenses').doc(uid()).collection('entries');
 const recRef  = () => db.collection('gh_received').doc(uid()).collection('entries');
 const metaRef = () => db.collection('gh_meta').doc(uid());
 
-/* ── LOAD ALL DATA ───────────────────────────────────────── */
-async function loadAll() {
-  // real-time listeners
+/* ── LOAD ALL ────────────────────────────────────────────── */
+function loadAll() {
   expRef().orderBy('date','desc').onSnapshot(snap => {
-    expenses = snap.docs.map(d => ({id:d.id, ...d.data()}));
+    expenses = snap.docs.map(d => ({id: d.id, ...d.data()}));
     populateMonthFilter('exp-month-filter', expenses);
-    renderExpenses();
-    renderAnalytics();
+    if (currentTab === 'expenses') renderExpenses();
+    // always rebuild analytics filter + dashboard on data change
+    rebuildAnalyticsFilter();
+    renderDashboard();
+    if (currentTab === 'analytics') renderAnalytics();
   });
 
   recRef().orderBy('date','desc').onSnapshot(snap => {
-    received = snap.docs.map(d => ({id:d.id, ...d.data()}));
+    received = snap.docs.map(d => ({id: d.id, ...d.data()}));
     populateMonthFilter('rec-month-filter', received);
-    renderReceived();
+    if (currentTab === 'received') renderReceived();
+    rebuildAnalyticsFilter();
+    renderDashboard();
+    if (currentTab === 'analytics') renderAnalytics();
   });
 
   metaRef().onSnapshot(doc => {
@@ -1151,12 +992,11 @@ async function loadAll() {
     categories = data.categories || ['Groceries','Fuel','Utilities','School','Rent','Health','Clothing','Dining','Other'];
     sources    = data.sources    || [];
     budget     = data.budget     || 0;
-    renderSettings();
-    renderAnalytics();
+    document.getElementById('budget-input').value = budget || '';
+    renderSettingsChips();
+    renderDashboard();
+    if (currentTab === 'analytics') renderAnalytics();
   });
-
-  // Analytics month filter init
-  populateAnalyticsMonthFilter();
 }
 
 /* ── MONTH FILTERS ───────────────────────────────────────── */
@@ -1169,21 +1009,93 @@ function populateMonthFilter(selectId, list) {
   if (keys.includes(cur)) sel.value = cur;
 }
 
-function populateAnalyticsMonthFilter() {
-  const allExpKeys = getMonthKeys(expenses);
-  const allRecKeys = getMonthKeys(received);
-  const merged = [...new Set([...allExpKeys, ...allRecKeys])].sort((a,b) => b.localeCompare(a));
-
-  const now = new Date();
-  const curKey = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
-
-  // Add current month if not present
-  if (!merged.includes(curKey)) merged.unshift(curKey);
-
+function rebuildAnalyticsFilter() {
   const sel = document.getElementById('analytics-month-filter');
+  if (!sel) return;
+  const prev = sel.value;
+  const expKeys = getMonthKeys(expenses);
+  const recKeys = getMonthKeys(received);
+  const merged  = [...new Set([...expKeys, ...recKeys])].sort((a,b) => b.localeCompare(a));
+  const cur = curMonthKey();
+  if (!merged.includes(cur)) merged.unshift(cur);
+
   sel.innerHTML = merged.map(k =>
-    `<option value="${k}"${k===curKey?' selected':''}>${monthLabel(k)}</option>`
+    `<option value="${k}">${monthLabel(k)}</option>`
   ).join('');
+
+  // keep previous selection if still valid, else default to current month
+  if (prev && merged.includes(prev)) sel.value = prev;
+  else sel.value = cur;
+}
+
+/* ── DASHBOARD ───────────────────────────────────────────── */
+function renderDashboard() {
+  const cur   = curMonthKey();
+  const label = monthLabel(cur);
+  const mExp  = filterByMonth(expenses, cur);
+  const mRec  = filterByMonth(received, cur);
+  const spent = mExp.reduce((s,e) => s + Number(e.amount), 0);
+  const recvd = mRec.reduce((s,e) => s + Number(e.amount), 0);
+  const net   = recvd - spent;
+  const pct   = budget > 0 ? Math.min((spent / budget) * 100, 100) : 0;
+  const over  = budget > 0 && spent > budget;
+  const warn  = budget > 0 && pct >= 80 && !over;
+
+  // month summary per previous months
+  const allKeys = [...new Set([...getMonthKeys(expenses), ...getMonthKeys(received)])]
+    .filter(k => k !== cur).slice(0,3);
+
+  const html = `
+    <div class="dash-hero">
+      <div class="dash-hero-label">${label} — Total Spent</div>
+      <div class="dash-hero-amount">${fmt(spent)}</div>
+      <div class="dash-hero-sub">${budget > 0 ? `Budget: ${fmt(budget)}` : 'No budget set — go to Settings'}</div>
+    </div>
+
+    <div class="dash-row">
+      <div class="dash-stat">
+        <div class="dash-stat-label">Received</div>
+        <div class="dash-stat-value received">${fmt(recvd)}</div>
+      </div>
+      <div class="dash-stat">
+        <div class="dash-stat-label">Net</div>
+        <div class="dash-stat-value ${net >= 0 ? 'net-pos' : 'net-neg'}">${net >= 0 ? '+' : ''}${fmt(net)}</div>
+      </div>
+    </div>
+
+    ${budget > 0 ? `
+    <div class="dash-budget-card">
+      <div class="dash-budget-header">
+        <div class="dash-budget-title">Budget used</div>
+        <div class="dash-budget-pct" style="color:${over ? 'var(--expense-col)' : warn ? '#F39C12' : 'var(--received-col)'}">${Math.round(pct)}%</div>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill ${over ? 'over' : warn ? 'warning' : ''}" style="width:${pct}%"></div>
+      </div>
+      <div class="dash-budget-sub">${over ? `Over by ${fmt(spent - budget)}` : `${fmt(budget - spent)} remaining`}</div>
+    </div>` : ''}
+
+    ${allKeys.length > 0 ? `
+    <div class="dash-section-title">Previous months</div>
+    <div class="dash-recent">
+      ${allKeys.map(k => {
+        const s = filterByMonth(expenses, k).reduce((a,e) => a + Number(e.amount), 0);
+        const r = filterByMonth(received, k).reduce((a,e) => a + Number(e.amount), 0);
+        const n = r - s;
+        return `
+        <div class="dash-month-row">
+          <div>
+            <div class="dash-month-name">${monthLabel(k)}</div>
+            <div class="dash-month-sub">Received ${fmt(r)}</div>
+          </div>
+          <div class="dash-month-amt" style="color:var(--expense-col)">${fmt(s)}</div>
+        </div>`;
+      }).join('')}
+    </div>` : ''}
+    <div style="height:8px"></div>
+  `;
+
+  document.getElementById('dash-content').innerHTML = html;
 }
 
 /* ── RENDER EXPENSES ─────────────────────────────────────── */
@@ -1193,23 +1105,15 @@ function renderExpenses() {
   const total  = list.reduce((s,e) => s + Number(e.amount), 0);
 
   const totalEl = document.getElementById('exp-total');
-  if (list.length > 0 || filter !== 'all') {
-    const label = filter === 'all' ? 'All time' : monthLabel(filter);
-    totalEl.innerHTML = `${label} &mdash; Total: <span>${fmt(total)}</span>`;
-  } else {
-    totalEl.textContent = '';
-  }
+  totalEl.innerHTML = list.length > 0
+    ? `${filter === 'all' ? 'All time' : monthLabel(filter)} &mdash; <span>${fmt(total)}</span>`
+    : '';
 
   const container = document.getElementById('exp-list');
   if (list.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state-title">No expenses yet</div>
-        <div class="empty-state-sub">Tap + to record your first expense.</div>
-      </div>`;
+    container.innerHTML = `<div class="empty-state"><div class="empty-state-title">No expenses</div><div class="empty-state-sub">Tap + to record your first expense.</div></div>`;
     return;
   }
-
   container.innerHTML = list.map(e => `
     <div class="entry-card">
       <div class="entry-left">
@@ -1237,23 +1141,15 @@ function renderReceived() {
   const total  = list.reduce((s,e) => s + Number(e.amount), 0);
 
   const totalEl = document.getElementById('rec-total');
-  if (list.length > 0 || filter !== 'all') {
-    const label = filter === 'all' ? 'All time' : monthLabel(filter);
-    totalEl.innerHTML = `${label} &mdash; Total: <span>${fmt(total)}</span>`;
-  } else {
-    totalEl.textContent = '';
-  }
+  totalEl.innerHTML = list.length > 0
+    ? `${filter === 'all' ? 'All time' : monthLabel(filter)} &mdash; <span>${fmt(total)}</span>`
+    : '';
 
   const container = document.getElementById('rec-list');
   if (list.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state-title">No entries yet</div>
-        <div class="empty-state-sub">Tap + to record money received.</div>
-      </div>`;
+    container.innerHTML = `<div class="empty-state"><div class="empty-state-title">No entries</div><div class="empty-state-sub">Tap + to record money received.</div></div>`;
     return;
   }
-
   container.innerHTML = list.map(e => `
     <div class="entry-card">
       <div class="entry-left">
@@ -1261,7 +1157,7 @@ function renderReceived() {
         <div class="entry-note">${escHtml(e.note || '—')}</div>
         <div class="entry-meta">
           <span>${formatDate(e.date)}</span>
-          <span class="badge badge-${e.recType||'transfer'}">${e.recType==='gift'?'Gift / Extra':'Transfer'}</span>
+          <span class="badge badge-${e.recType||'transfer'}">${e.recType==='gift' ? 'Gift / Extra' : 'Transfer'}</span>
         </div>
       </div>
       <div class="entry-right">
@@ -1276,27 +1172,22 @@ function renderReceived() {
 
 /* ── ANALYTICS ───────────────────────────────────────────── */
 function renderAnalytics() {
-  const selEl = document.getElementById('analytics-month-filter');
-  if (!selEl) return;
-
-  // re-populate in case data changed
-  populateAnalyticsMonthFilter();
-
-  const selMonth = selEl.value;
-  const monthExp = filterByMonth(expenses, selMonth);
+  const sel = document.getElementById('analytics-month-filter');
+  if (!sel) return;
+  const selMonth  = sel.value;
+  const monthExp  = filterByMonth(expenses, selMonth);
   const totalSpent = monthExp.reduce((s,e) => s + Number(e.amount), 0);
 
-  // bar chart title
-  document.getElementById('bar-chart-title').textContent = selMonth ? monthLabel(selMonth) : 'This month';
+  document.getElementById('bar-chart-title').textContent = monthLabel(selMonth);
 
-  // chart colors
-  const isDark = document.body.classList.contains('dark');
-  const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+  const isDark     = document.body.classList.contains('dark');
+  const gridColor  = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
   const labelColor = isDark ? '#9A9A9A' : '#6B6B6B';
+  const fontStack  = '-apple-system, BlinkMacSystemFont, Inter, sans-serif';
 
-  // ── BAR CHART ──
+  // bar chart
   const barCtx = document.getElementById('bar-chart').getContext('2d');
-  if (barChart) barChart.destroy();
+  if (barChart) { barChart.destroy(); barChart = null; }
   barChart = new Chart(barCtx, {
     type: 'bar',
     data: {
@@ -1304,10 +1195,10 @@ function renderAnalytics() {
       datasets: [{
         data: [budget, totalSpent],
         backgroundColor: [
-          isDark ? 'rgba(74,111,165,0.6)' : 'rgba(74,111,165,0.7)',
+          isDark ? 'rgba(74,111,165,0.65)' : 'rgba(74,111,165,0.75)',
           totalSpent > budget
-            ? (isDark ? 'rgba(224,82,82,0.7)' : 'rgba(224,82,82,0.8)')
-            : (isDark ? 'rgba(46,204,113,0.6)' : 'rgba(46,204,113,0.7)')
+            ? (isDark ? 'rgba(224,82,82,0.75)' : 'rgba(224,82,82,0.85)')
+            : (isDark ? 'rgba(46,204,113,0.65)' : 'rgba(46,204,113,0.75)')
         ],
         borderRadius: 8,
         borderSkipped: false,
@@ -1315,34 +1206,43 @@ function renderAnalytics() {
     },
     options: {
       responsive: true,
-      plugins: { legend: { display: false }, tooltip: {
-        callbacks: { label: ctx => fmt(ctx.raw) }
-      }},
+      animation: { duration: 300 },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => fmt(ctx.raw) }}
+      },
       scales: {
-        x: { grid: { display: false }, ticks: { color: labelColor, font: { size: 12, family: '-apple-system, BlinkMacSystemFont, Inter, sans-serif' }}},
-        y: { grid: { color: gridColor }, ticks: { color: labelColor, font: { size: 11 }, callback: v => 'PKR ' + (v>=1000 ? (v/1000)+'k' : v) }}
+        x: { grid: { display: false }, ticks: { color: labelColor, font: { size: 12, family: fontStack }}},
+        y: { grid: { color: gridColor }, ticks: { color: labelColor, font: { size: 11, family: fontStack }, callback: v => v >= 1000 ? 'PKR '+(v/1000)+'k' : 'PKR '+v }}
       }
     }
   });
 
-  // ── PIE CHART ──
+  // pie chart
   const catTotals = {};
   monthExp.forEach(e => {
     const cat = e.category || 'Other';
     catTotals[cat] = (catTotals[cat] || 0) + Number(e.amount);
   });
-
   const pieLabels = Object.keys(catTotals);
   const pieData   = Object.values(catTotals);
 
-  const palette = [
-    '#4A6FA5','#E05252','#2ECC71','#F39C12','#9B59B6',
-    '#1ABC9C','#E67E22','#3498DB','#E91E63','#607D8B'
-  ];
+  const pieWrapper = document.getElementById('pie-wrapper');
+  const pieCtx     = document.getElementById('pie-chart').getContext('2d');
+  if (pieChart) { pieChart.destroy(); pieChart = null; }
 
-  const pieCtx = document.getElementById('pie-chart').getContext('2d');
-  if (pieChart) pieChart.destroy();
-  pieChart = new Chart(pieCtx, {
+  if (pieLabels.length === 0) {
+    pieWrapper.innerHTML = `<div class="empty-state"><div class="empty-state-title">No expense data</div><div class="empty-state-sub">Add expenses for ${monthLabel(selMonth)} to see a breakdown.</div></div>`;
+    return;
+  } else {
+    // restore canvas if it was replaced by empty state
+    if (!pieWrapper.querySelector('canvas')) {
+      pieWrapper.innerHTML = '<canvas id="pie-chart" height="220"></canvas>';
+    }
+  }
+
+  const palette = ['#4A6FA5','#E05252','#2ECC71','#F39C12','#9B59B6','#1ABC9C','#E67E22','#3498DB','#E91E63','#607D8B'];
+  pieChart = new Chart(document.getElementById('pie-chart').getContext('2d'), {
     type: 'doughnut',
     data: {
       labels: pieLabels,
@@ -1355,15 +1255,9 @@ function renderAnalytics() {
     },
     options: {
       responsive: true,
+      animation: { duration: 300 },
       plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            color: labelColor,
-            padding: 12,
-            font: { size: 12, family: '-apple-system, BlinkMacSystemFont, Inter, sans-serif' }
-          }
-        },
+        legend: { position: 'bottom', labels: { color: labelColor, padding: 12, font: { size: 12, family: fontStack }}},
         tooltip: { callbacks: { label: ctx => ctx.label + ': ' + fmt(ctx.raw) }}
       },
       cutout: '55%'
@@ -1371,38 +1265,20 @@ function renderAnalytics() {
   });
 }
 
-/* ── SETTINGS RENDER ─────────────────────────────────────── */
-function renderSettings() {
-  // budget
-  document.getElementById('budget-input').value = budget || '';
+/* ── SETTINGS ────────────────────────────────────────────── */
+function renderSettingsChips() {
+  document.getElementById('cat-chip-list').innerHTML =
+    categories.map((c,i) => `<div class="chip">${escHtml(c)}<button class="chip-del" onclick="removeCategory(${i})">×</button></div>`).join('');
+  document.getElementById('src-chip-list').innerHTML =
+    sources.length === 0
+      ? '<span style="font-size:13px;color:var(--text-muted)">No sources saved yet</span>'
+      : sources.map((s,i) => `<div class="chip">${escHtml(s)}<button class="chip-del" onclick="removeSource(${i})">×</button></div>`).join('');
 
-  // categories chips
-  const catList = document.getElementById('cat-chip-list');
-  catList.innerHTML = categories.map((c,i) => `
-    <div class="chip">
-      ${escHtml(c)}
-      <button class="chip-del" onclick="removeCategory(${i})">×</button>
-    </div>`).join('');
-
-  // sources chips
-  const srcList = document.getElementById('src-chip-list');
-  if (sources.length === 0) {
-    srcList.innerHTML = '<span style="font-size:13px;color:var(--text-muted)">No sources saved yet</span>';
-  } else {
-    srcList.innerHTML = sources.map((s,i) => `
-      <div class="chip">
-        ${escHtml(s)}
-        <button class="chip-del" onclick="removeSource(${i})">×</button>
-      </div>`).join('');
-  }
-
-  // populate category select in modal
-  const catSel = document.getElementById('exp-category');
-  catSel.innerHTML = categories.map(c => `<option value="${escHtml(c)}">${escHtml(c)}</option>`).join('');
-
-  // populate source select in modal
-  const srcSel = document.getElementById('rec-source-select');
-  srcSel.innerHTML = '<option value="">Select saved source…</option>' +
+  // sync modal selects
+  document.getElementById('exp-category').innerHTML =
+    categories.map(c => `<option value="${escHtml(c)}">${escHtml(c)}</option>`).join('');
+  document.getElementById('rec-source-select').innerHTML =
+    '<option value="">Select saved source…</option>' +
     sources.map(s => `<option value="${escHtml(s)}">${escHtml(s)}</option>`).join('');
 }
 
@@ -1410,13 +1286,13 @@ async function saveBudget() {
   const val = parseFloat(document.getElementById('budget-input').value) || 0;
   budget = val;
   await metaRef().set({ budget: val }, { merge: true });
+  showToast('Budget saved');
 }
 
 async function addCategory() {
   const inp = document.getElementById('new-cat-input');
   const val = inp.value.trim();
-  if (!val) return;
-  if (categories.includes(val)) { inp.value=''; return; }
+  if (!val || categories.includes(val)) { inp.value = ''; return; }
   categories.push(val);
   await metaRef().set({ categories }, { merge: true });
   inp.value = '';
@@ -1430,8 +1306,7 @@ async function removeCategory(i) {
 async function addSource() {
   const inp = document.getElementById('new-src-input');
   const val = inp.value.trim();
-  if (!val) return;
-  if (sources.includes(val)) { inp.value=''; return; }
+  if (!val || sources.includes(val)) { inp.value = ''; return; }
   sources.push(val);
   await metaRef().set({ sources }, { merge: true });
   inp.value = '';
@@ -1442,36 +1317,28 @@ async function removeSource(i) {
   await metaRef().set({ sources }, { merge: true });
 }
 
-/* ── MODAL HELPERS ───────────────────────────────────────── */
-function openModal(id) {
-  document.getElementById(id).classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-  document.body.style.overflow = '';
-}
+/* ── MODALS ──────────────────────────────────────────────── */
+function openModal(id)  { document.getElementById(id).classList.add('open');    document.body.style.overflow = 'hidden'; }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
 
 function openAddModal() {
-  if (currentTab === 'expenses') {
+  renderSettingsChips();
+  if (currentTab === 'expenses' || currentTab === 'dashboard') {
     document.getElementById('exp-modal-title').textContent = 'Add Expense';
     document.getElementById('exp-edit-id').value = '';
-    document.getElementById('exp-amount').value = '';
-    document.getElementById('exp-note').value = '';
-    document.getElementById('exp-date').value = todayISO();
+    document.getElementById('exp-amount').value  = '';
+    document.getElementById('exp-note').value    = '';
+    document.getElementById('exp-date').value    = todayISO();
     selectMethod('cash');
-    renderSettings();
     openModal('exp-modal');
   } else if (currentTab === 'received') {
     document.getElementById('rec-modal-title').textContent = 'Add Received';
-    document.getElementById('rec-edit-id').value = '';
-    document.getElementById('rec-amount').value = '';
-    document.getElementById('rec-note').value = '';
+    document.getElementById('rec-edit-id').value    = '';
+    document.getElementById('rec-amount').value     = '';
+    document.getElementById('rec-note').value       = '';
     document.getElementById('rec-source-new').value = '';
-    document.getElementById('rec-date').value = todayISO();
+    document.getElementById('rec-date').value       = todayISO();
     selectRecType('transfer');
-    renderSettings();
     openModal('rec-modal');
   }
 }
@@ -1494,23 +1361,20 @@ async function saveExpense() {
     method:   expMethod,
   };
   const editId = document.getElementById('exp-edit-id').value;
-  if (editId) {
-    await expRef().doc(editId).update(entry);
-  } else {
-    await expRef().add({ ...entry, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-  }
+  if (editId) { await expRef().doc(editId).update(entry); showToast('Expense updated'); }
+  else { await expRef().add({...entry, createdAt: firebase.firestore.FieldValue.serverTimestamp()}); showToast('Expense saved'); }
   closeModal('exp-modal');
 }
 
 function editExpense(id) {
   const e = expenses.find(x => x.id === id);
   if (!e) return;
+  renderSettingsChips();
   document.getElementById('exp-modal-title').textContent = 'Edit Expense';
   document.getElementById('exp-edit-id').value = id;
-  document.getElementById('exp-amount').value = e.amount;
-  document.getElementById('exp-note').value = e.note || '';
-  document.getElementById('exp-date').value = e.date || todayISO();
-  renderSettings();
+  document.getElementById('exp-amount').value  = e.amount;
+  document.getElementById('exp-note').value    = e.note || '';
+  document.getElementById('exp-date').value    = e.date || todayISO();
   document.getElementById('exp-category').value = e.category || categories[0];
   selectMethod(e.method || 'cash');
   openModal('exp-modal');
@@ -1520,58 +1384,48 @@ function editExpense(id) {
 function selectRecType(t) {
   recType = t;
   document.getElementById('rec-transfer-btn').classList.toggle('selected', t==='transfer');
-  document.getElementById('rec-gift-btn').classList.toggle('selected', t==='gift');
+  document.getElementById('rec-gift-btn').classList.toggle('selected',     t==='gift');
 }
 
 async function saveReceived() {
   const amount = parseFloat(document.getElementById('rec-amount').value);
   if (!amount || amount <= 0) { alert('Enter a valid amount.'); return; }
-
   let source = document.getElementById('rec-source-new').value.trim();
   if (!source) source = document.getElementById('rec-source-select').value;
   if (!source) { alert('Please enter or select a source.'); return; }
-
-  // auto-save new source
   if (!sources.includes(source)) {
     sources.push(source);
     await metaRef().set({ sources }, { merge: true });
   }
-
   const entry = {
-    amount,
-    source,
-    recType,
-    note:  document.getElementById('rec-note').value.trim(),
-    date:  document.getElementById('rec-date').value || todayISO(),
+    amount, source, recType,
+    note: document.getElementById('rec-note').value.trim(),
+    date: document.getElementById('rec-date').value || todayISO(),
   };
-
   const editId = document.getElementById('rec-edit-id').value;
-  if (editId) {
-    await recRef().doc(editId).update(entry);
-  } else {
-    await recRef().add({ ...entry, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-  }
+  if (editId) { await recRef().doc(editId).update(entry); showToast('Entry updated'); }
+  else { await recRef().add({...entry, createdAt: firebase.firestore.FieldValue.serverTimestamp()}); showToast('Entry saved'); }
   closeModal('rec-modal');
 }
 
 function editReceived(id) {
   const e = received.find(x => x.id === id);
   if (!e) return;
-  document.getElementById('rec-modal-title').textContent = 'Edit Received';
-  document.getElementById('rec-edit-id').value = id;
-  document.getElementById('rec-amount').value = e.amount;
-  document.getElementById('rec-note').value = e.note || '';
-  document.getElementById('rec-source-new').value = '';
-  document.getElementById('rec-date').value = e.date || todayISO();
-  renderSettings();
-  document.getElementById('rec-source-select').value = e.source || '';
+  renderSettingsChips();
+  document.getElementById('rec-modal-title').textContent  = 'Edit Received';
+  document.getElementById('rec-edit-id').value            = id;
+  document.getElementById('rec-amount').value             = e.amount;
+  document.getElementById('rec-note').value               = e.note || '';
+  document.getElementById('rec-source-new').value         = '';
+  document.getElementById('rec-date').value               = e.date || todayISO();
+  document.getElementById('rec-source-select').value      = e.source || '';
   selectRecType(e.recType || 'transfer');
   openModal('rec-modal');
 }
 
 /* ── DELETE ──────────────────────────────────────────────── */
 function promptDelete(id, type) {
-  document.getElementById('del-id').value = id;
+  document.getElementById('del-id').value   = id;
   document.getElementById('del-type').value = type;
   openModal('del-modal');
 }
@@ -1581,6 +1435,7 @@ async function confirmDelete() {
   const type = document.getElementById('del-type').value;
   if (type === 'expense') await expRef().doc(id).delete();
   else await recRef().doc(id).delete();
+  showToast('Entry deleted');
   closeModal('del-modal');
 }
 
@@ -1593,38 +1448,19 @@ function switchTab(tab) {
   document.getElementById('nav-' + tab).classList.add('active');
 
   const fab = document.getElementById('fab-btn');
-  if (tab === 'analytics' || tab === 'settings') {
-    fab.style.display = 'none';
-  } else {
-    fab.style.display = 'flex';
-  }
+  fab.style.display = (tab === 'analytics' || tab === 'settings') ? 'none' : 'flex';
 
-  if (tab === 'analytics') {
-    setTimeout(renderAnalytics, 50);
-  }
+  if (tab === 'expenses')  renderExpenses();
+  if (tab === 'received')  renderReceived();
+  if (tab === 'dashboard') renderDashboard();
+  if (tab === 'analytics') { rebuildAnalyticsFilter(); setTimeout(renderAnalytics, 30); }
 }
 
-/* ── CLOSE MODALS ON OVERLAY CLICK ──────────────────────── */
+/* ── OVERLAY CLOSE ───────────────────────────────────────── */
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
-  overlay.addEventListener('click', e => {
-    if (e.target === overlay) closeModal(overlay.id);
-  });
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(overlay.id); });
 });
 
-/* ── UTILS ───────────────────────────────────────────────── */
-function escHtml(s) {
-  return String(s)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function formatDate(iso) {
-  if (!iso) return '—';
-  const [y,m,d] = iso.split('-');
-  return `${parseInt(d,10)} ${MONTH_NAMES[parseInt(m,10)-1]} ${y}`;
-}
-
-/* ── INIT THEME ON LOAD ──────────────────────────────────── */
 initTheme();
 </script>
 </body>
