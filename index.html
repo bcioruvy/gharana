@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Gharana</title>
+<meta name="theme-color" content="#ffffff" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<style>
+/* ── TOKENS ─────────────────────────────────────────────── */
+:root {
+  --accent:       #4A6FA5;
+  --accent-dim:   #3a5a8a;
+  --danger:       #C0392B;
+  --success:      #27AE60;
+  --expense-col:  #E05252;
+  --received-col: #2ECC71;
+
+  --bg:           #F8F8F6;
+  --surface:      #FFFFFF;
+  --surface2:     #F2F2F0;
+  --border:       #E8E8E5;
+  --text-primary: #1A1A1A;
+  --text-secondary:#6B6B6B;
+  --text-muted:   #A0A0A0;
+  --nav-bg:       #FFFFFF;
+  --shadow:       0 1px 3px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.04);
+  --shadow-lg:    0 4px 20px rgba(0,0,0,0.10);
+  --radius:       12px;
+  --radius-sm:    8px;
+}
+
+body.dark {
+  --bg:           #111111;
+  --surface:      #1C1C1E;
+  --surface2:     #252525;
+  --border:       #2C2C2E;
+  --text-primary: #F0F0F0;
+  --text-secondary:#9A9A9A;
+  --text-muted:   #5A5A5A;
+  --nav-bg:       #1C1C1E;
+  --shadow:       0 1px 3px rgba(0,0,0,0.30), 0 4px 12px rgba(0,0,0,0.20);
+  --shadow-lg:    0 4px 20px rgba(0,0,0,0.40);
+}
+
+/* ── RESET ───────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.25s, color 0.25s;
+  overflow: hidden;
+}
+
+/* ── LAYOUT ──────────────────────────────────────────────── */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.screen { display: none; flex: 1; overflow-y: auto; padding-bottom: 80px; }
+.screen.active { display: block; }
+
+/* ── AUTH SCREEN ─────────────────────────────────────────── */
+#auth-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100dvh;
+  padding: 40px 32px;
+  background: var(--bg);
+}
+
+.auth-wordmark {
+  font-size: 32px;
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  text-transform: lowercase;
+}
+
+.auth-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-bottom: 56px;
+}
+
+.auth-btn {
+  width: 100%;
+  padding: 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  letter-spacing: 0.01em;
+}
+
+.auth-btn:hover { border-color: var(--accent); background: var(--surface2); }
+
+/* ── TOP BAR ─────────────────────────────────────────────── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 12px;
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.topbar-title {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: var(--text-primary);
+}
+
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+
+/* ── FILTER BAR ──────────────────────────────────────────── */
+.filter-bar {
+  padding: 0 20px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-select {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6B6B' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+.filter-select:focus { outline: none; border-color: var(--accent); }
+
+.month-total {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 0 20px 16px;
+  font-weight: 500;
+}
+
+.month-total span { color: var(--text-primary); font-weight: 600; }
+
+/* ── ENTRY LIST ──────────────────────────────────────────── */
+.entry-list { padding: 0 20px; display: flex; flex-direction: column; gap: 10px; }
+
+.entry-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  transition: box-shadow 0.2s;
+}
+
+.entry-card:active { box-shadow: var(--shadow-lg); }
+
+.entry-left { flex: 1; min-width: 0; }
+
+.entry-cat {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.entry-note {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.entry-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  gap: 8px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.badge-cash { background: #FEF3C7; color: #92400E; }
+.badge-bank { background: #DBEAFE; color: #1E40AF; }
+.badge-transfer { background: #EDE9FE; color: #5B21B6; }
+.badge-gift { background: #FCE7F3; color: #9D174D; }
+
+body.dark .badge-cash { background: #3D2E08; color: #D97706; }
+body.dark .badge-bank { background: #1E3A5F; color: #60A5FA; }
+body.dark .badge-transfer { background: #2D1F5E; color: #A78BFA; }
+body.dark .badge-gift { background: #3D1040; color: #F472B6; }
+
+.entry-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+
+.entry-amount {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+}
+
+.amount-expense { color: var(--expense-col); }
+.amount-received { color: var(--received-col); }
+
+.entry-actions { display: flex; gap: 6px; }
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+  font-family: inherit;
+}
+
+.icon-btn:hover { color: var(--text-primary); background: var(--surface2); }
+.icon-btn.delete:hover { color: var(--danger); }
+
+/* ── EMPTY STATE ─────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 60px 32px;
+  color: var(--text-muted);
+}
+
+.empty-state-title { font-size: 15px; font-weight: 500; margin-bottom: 6px; color: var(--text-secondary); }
+.empty-state-sub { font-size: 13px; line-height: 1.5; }
+
+/* ── FAB ─────────────────────────────────────────────────── */
+.fab {
+  position: fixed;
+  bottom: 90px;
+  right: 24px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 24px;
+  font-weight: 300;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(74, 111, 165, 0.40);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s, box-shadow 0.15s;
+  z-index: 20;
+  line-height: 1;
+}
+
+.fab:active { transform: scale(0.93); }
+
+/* ── BOTTOM NAV ──────────────────────────────────────────── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: var(--nav-bg);
+  border-top: 1px solid var(--border);
+  display: flex;
+  z-index: 30;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0 12px;
+  gap: 3px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-family: inherit;
+  transition: color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nav-item.active { color: var(--accent); }
+
+.nav-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.nav-item.active .nav-dot { opacity: 1; }
+
+.nav-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* ── MODAL ───────────────────────────────────────────────── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.40);
+  z-index: 100;
+  align-items: flex-end;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border-radius: 20px 20px 0 0;
+  padding: 24px 24px 40px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90dvh;
+  overflow-y: auto;
+  animation: slideUp 0.25s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.modal-title { font-size: 18px; font-weight: 600; letter-spacing: -0.2px; }
+
+.modal-close {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.modal-close:hover { background: var(--border); }
+
+/* ── FORM ────────────────────────────────────────────────── */
+.form-group { margin-bottom: 16px; }
+
+.form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 7px;
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface2);
+  color: var(--text-primary);
+  font-size: 15px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--surface);
+}
+
+.form-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6B6B' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+.form-textarea { resize: none; height: 80px; }
+
+.toggle-row {
+  display: flex;
+  gap: 8px;
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 11px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface2);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+
+.toggle-btn.selected {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--surface);
+  font-weight: 600;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 15px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  margin-top: 8px;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.submit-btn:hover { background: var(--accent-dim); }
+.submit-btn:active { transform: scale(0.98); }
+
+/* ── ANALYTICS ───────────────────────────────────────────── */
+.analytics-section {
+  padding: 0 20px;
+  margin-bottom: 24px;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.chart-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+
+.chart-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  letter-spacing: 0.01em;
+}
+
+.analytics-month-bar {
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── SETTINGS ────────────────────────────────────────────── */
+.settings-section {
+  padding: 0 20px;
+  margin-bottom: 28px;
+}
+
+.settings-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.settings-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 16px;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+}
+
+.settings-row:last-child { border-bottom: none; }
+
+.settings-row-label {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.settings-row-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.settings-value {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* toggle switch */
+.toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input { display: none; }
+
+.toggle-track {
+  position: absolute;
+  inset: 0;
+  background: var(--border);
+  border-radius: 13px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.toggle-switch input:checked + .toggle-track { background: var(--accent); }
+
+.toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+.toggle-switch input:checked ~ .toggle-thumb { transform: translateX(18px); }
+
+/* chips list */
+.chip-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+.chip {
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  font-size: 13px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chip-del {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  padding: 0;
+}
+
+.chip-del:hover { color: var(--danger); }
+
+.add-chip-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.add-chip-input {
+  flex: 1;
+  padding: 10px 13px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface2);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.add-chip-input:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+
+.add-chip-btn {
+  padding: 10px 16px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* danger btn */
+.danger-btn {
+  width: 100%;
+  padding: 14px;
+  background: none;
+  border: 1.5px solid var(--danger);
+  color: var(--danger);
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.danger-btn:hover { background: rgba(192,57,43,0.06); }
+
+/* ── MISC ────────────────────────────────────────────────── */
+.topbar-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface2);
+  transition: background 0.15s;
+}
+
+.topbar-icon-btn:hover { background: var(--border); }
+
+.loading-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.loading-dots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes pulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.9); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+.budget-inline-edit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.budget-inline-input {
+  width: 100px;
+  padding: 6px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface2);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  text-align: right;
+}
+
+.budget-inline-input:focus { outline: none; border-color: var(--accent); }
+
+.budget-save-btn {
+  padding: 6px 12px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-wordmark">gharana</div>
+  <div class="auth-sub">household finance</div>
+  <button class="auth-btn" onclick="signIn()">Continue with Google</button>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none;">
+
+  <!-- EXPENSES TAB -->
+  <div id="tab-expenses" class="screen active">
+    <div class="topbar">
+      <div class="topbar-title">Expenses</div>
+    </div>
+    <div class="filter-bar">
+      <select class="filter-select" id="exp-month-filter" onchange="renderExpenses()">
+        <option value="all">All months</option>
+      </select>
+    </div>
+    <div class="month-total" id="exp-total"></div>
+    <div class="entry-list" id="exp-list">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+
+  <!-- RECEIVED TAB -->
+  <div id="tab-received" class="screen">
+    <div class="topbar">
+      <div class="topbar-title">Received</div>
+    </div>
+    <div class="filter-bar">
+      <select class="filter-select" id="rec-month-filter" onchange="renderReceived()">
+        <option value="all">All months</option>
+      </select>
+    </div>
+    <div class="month-total" id="rec-total"></div>
+    <div class="entry-list" id="rec-list">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+
+  <!-- ANALYTICS TAB -->
+  <div id="tab-analytics" class="screen">
+    <div class="topbar">
+      <div class="topbar-title">Analytics</div>
+    </div>
+    <div class="analytics-month-bar">
+      <select class="filter-select" id="analytics-month-filter" onchange="renderAnalytics()" style="flex:1"></select>
+    </div>
+    <div class="analytics-section">
+      <div class="section-label">Budget vs Spent</div>
+      <div class="chart-card">
+        <div class="chart-title" id="bar-chart-title">This month</div>
+        <canvas id="bar-chart" height="160"></canvas>
+      </div>
+    </div>
+    <div class="analytics-section">
+      <div class="section-label">By Category</div>
+      <div class="chart-card">
+        <canvas id="pie-chart" height="220"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS TAB -->
+  <div id="tab-settings" class="screen">
+    <div class="topbar">
+      <div class="topbar-title">Settings</div>
+    </div>
+    <div style="padding-top:8px;">
+
+      <div class="settings-section">
+        <div class="settings-section-title">Appearance</div>
+        <div class="settings-card">
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Dark Mode</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="dark-toggle" onchange="toggleDark(this.checked)">
+              <div class="toggle-track"></div>
+              <div class="toggle-thumb"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Budget</div>
+        <div class="settings-card">
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Monthly Budget</div>
+              <div class="settings-row-sub">Used in Analytics bar chart</div>
+            </div>
+            <div class="budget-inline-edit">
+              <input class="budget-inline-input" type="number" id="budget-input" placeholder="0" />
+              <button class="budget-save-btn" onclick="saveBudget()">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Categories</div>
+        <div class="settings-card" style="padding:16px;">
+          <div class="chip-list" id="cat-chip-list"></div>
+          <div class="add-chip-row">
+            <input class="add-chip-input" type="text" id="new-cat-input" placeholder="Add category..." />
+            <button class="add-chip-btn" onclick="addCategory()">Add</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Sources</div>
+        <div class="settings-card" style="padding:16px;">
+          <div class="chip-list" id="src-chip-list"></div>
+          <div class="add-chip-row">
+            <input class="add-chip-input" type="text" id="new-src-input" placeholder="Add source..." />
+            <button class="add-chip-btn" onclick="addSource()">Add</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Account</div>
+        <div class="settings-card">
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label" id="user-name-display">—</div>
+              <div class="settings-row-sub" id="user-email-display">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <button class="danger-btn" onclick="signOut()">Sign Out</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="switchTab('expenses')" id="nav-expenses">
+      <div class="nav-dot"></div>
+      <div class="nav-label">Expenses</div>
+    </button>
+    <button class="nav-item" onclick="switchTab('received')" id="nav-received">
+      <div class="nav-dot"></div>
+      <div class="nav-label">Received</div>
+    </button>
+    <button class="nav-item" onclick="switchTab('analytics')" id="nav-analytics">
+      <div class="nav-dot"></div>
+      <div class="nav-label">Analytics</div>
+    </button>
+    <button class="nav-item" onclick="switchTab('settings')" id="nav-settings">
+      <div class="nav-dot"></div>
+      <div class="nav-label">Settings</div>
+    </button>
+  </nav>
+
+  <!-- FAB (hidden on analytics/settings) -->
+  <button class="fab" id="fab-btn" onclick="openAddModal()">+</button>
+</div>
+
+<!-- ADD EXPENSE MODAL -->
+<div class="modal-overlay" id="exp-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="exp-modal-title">Add Expense</div>
+      <button class="modal-close" onclick="closeModal('exp-modal')">×</button>
+    </div>
+    <input type="hidden" id="exp-edit-id" />
+    <div class="form-group">
+      <label class="form-label">Amount (PKR)</label>
+      <input class="form-input" type="number" id="exp-amount" placeholder="0" inputmode="decimal" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Category</label>
+      <select class="form-select" id="exp-category"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Note</label>
+      <input class="form-input" type="text" id="exp-note" placeholder="What was this for?" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Date</label>
+      <input class="form-input" type="date" id="exp-date" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Method</label>
+      <div class="toggle-row">
+        <button class="toggle-btn selected" id="exp-cash-btn" onclick="selectMethod('cash')">Cash</button>
+        <button class="toggle-btn" id="exp-bank-btn" onclick="selectMethod('bank')">Bank</button>
+      </div>
+    </div>
+    <button class="submit-btn" onclick="saveExpense()">Save Expense</button>
+  </div>
+</div>
+
+<!-- ADD RECEIVED MODAL -->
+<div class="modal-overlay" id="rec-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="rec-modal-title">Add Received</div>
+      <button class="modal-close" onclick="closeModal('rec-modal')">×</button>
+    </div>
+    <input type="hidden" id="rec-edit-id" />
+    <div class="form-group">
+      <label class="form-label">Amount (PKR)</label>
+      <input class="form-input" type="number" id="rec-amount" placeholder="0" inputmode="decimal" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Source</label>
+      <select class="form-select" id="rec-source-select"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Or add new source</label>
+      <input class="form-input" type="text" id="rec-source-new" placeholder="e.g. Meezan Household Account" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Type</label>
+      <div class="toggle-row">
+        <button class="toggle-btn selected" id="rec-transfer-btn" onclick="selectRecType('transfer')">Transfer</button>
+        <button class="toggle-btn" id="rec-gift-btn" onclick="selectRecType('gift')">Gift / Extra</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Note</label>
+      <input class="form-input" type="text" id="rec-note" placeholder="Optional note" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Date</label>
+      <input class="form-input" type="date" id="rec-date" />
+    </div>
+    <button class="submit-btn" onclick="saveReceived()">Save Entry</button>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal-overlay" id="del-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Delete entry?</div>
+      <button class="modal-close" onclick="closeModal('del-modal')">×</button>
+    </div>
+    <p style="color:var(--text-secondary);font-size:14px;margin-bottom:24px;line-height:1.5;">This cannot be undone.</p>
+    <input type="hidden" id="del-id" />
+    <input type="hidden" id="del-type" />
+    <button class="submit-btn" style="background:var(--danger);" onclick="confirmDelete()">Delete</button>
+  </div>
+</div>
+
+<script>
+/* ── FIREBASE CONFIG ─────────────────────────────────────── */
+const firebaseConfig = {
+  apiKey: "AIzaSyBNsOlTkQ3JsmImU0DsQwLzH2WJz_4nAao",
+  authDomain: "ledger-app-9ca93.firebaseapp.com",
+  projectId: "ledger-app-9ca93",
+  storageBucket: "ledger-app-9ca93.appspot.com",
+  messagingSenderId: "482331587665",
+  appId: "1:482331587665:web:3c9ce621b97e4ef23b1f4b"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+/* ── STATE ───────────────────────────────────────────────── */
+let currentUser = null;
+let expenses    = [];
+let received    = [];
+let categories  = [];
+let sources     = [];
+let budget      = 0;
+let currentTab  = 'expenses';
+let expMethod   = 'cash';
+let recType     = 'transfer';
+let barChart    = null;
+let pieChart    = null;
+
+const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+/* ── HELPERS ─────────────────────────────────────────────── */
+const fmt = n => 'PKR ' + Number(n).toLocaleString('en-PK', {minimumFractionDigits:0, maximumFractionDigits:0});
+const todayISO = () => new Date().toISOString().split('T')[0];
+const monthKey = iso => iso ? iso.slice(0,7) : '';
+const monthLabel = key => {
+  const [y,m] = key.split('-');
+  return MONTH_NAMES[parseInt(m,10)-1] + ' ' + y;
+};
+
+function getMonthKeys(list) {
+  const keys = [...new Set(list.map(e => monthKey(e.date)))].filter(Boolean);
+  return keys.sort((a,b) => b.localeCompare(a));
+}
+
+function filterByMonth(list, val) {
+  if (!val || val === 'all') return list;
+  return list.filter(e => monthKey(e.date) === val);
+}
+
+/* ── THEME ───────────────────────────────────────────────── */
+function initTheme() {
+  const saved = localStorage.getItem('gh_dark');
+  const isDark = saved === 'true';
+  document.body.classList.toggle('dark', isDark);
+  const tog = document.getElementById('dark-toggle');
+  if (tog) tog.checked = isDark;
+}
+
+function toggleDark(on) {
+  document.body.classList.toggle('dark', on);
+  localStorage.setItem('gh_dark', on);
+  if (barChart) renderAnalytics();
+}
+
+/* ── AUTH ────────────────────────────────────────────────── */
+function signIn() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch(e => alert('Sign-in failed: ' + e.message));
+}
+
+function signOut() {
+  auth.signOut();
+}
+
+auth.onAuthStateChanged(user => {
+  if (user) {
+    currentUser = user;
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    document.getElementById('user-name-display').textContent = user.displayName || 'User';
+    document.getElementById('user-email-display').textContent = user.email || '';
+    initTheme();
+    loadAll();
+  } else {
+    currentUser = null;
+    document.getElementById('auth-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+  }
+});
+
+/* ── FIRESTORE PATHS ─────────────────────────────────────── */
+const uid = () => currentUser.uid;
+const expRef  = () => db.collection('gh_expenses').doc(uid()).collection('entries');
+const recRef  = () => db.collection('gh_received').doc(uid()).collection('entries');
+const metaRef = () => db.collection('gh_meta').doc(uid());
+
+/* ── LOAD ALL DATA ───────────────────────────────────────── */
+async function loadAll() {
+  // real-time listeners
+  expRef().orderBy('date','desc').onSnapshot(snap => {
+    expenses = snap.docs.map(d => ({id:d.id, ...d.data()}));
+    populateMonthFilter('exp-month-filter', expenses);
+    renderExpenses();
+    renderAnalytics();
+  });
+
+  recRef().orderBy('date','desc').onSnapshot(snap => {
+    received = snap.docs.map(d => ({id:d.id, ...d.data()}));
+    populateMonthFilter('rec-month-filter', received);
+    renderReceived();
+  });
+
+  metaRef().onSnapshot(doc => {
+    const data = doc.exists ? doc.data() : {};
+    categories = data.categories || ['Groceries','Fuel','Utilities','School','Rent','Health','Clothing','Dining','Other'];
+    sources    = data.sources    || [];
+    budget     = data.budget     || 0;
+    renderSettings();
+    renderAnalytics();
+  });
+
+  // Analytics month filter init
+  populateAnalyticsMonthFilter();
+}
+
+/* ── MONTH FILTERS ───────────────────────────────────────── */
+function populateMonthFilter(selectId, list) {
+  const sel = document.getElementById(selectId);
+  const cur = sel.value;
+  const keys = getMonthKeys(list);
+  sel.innerHTML = '<option value="all">All months</option>' +
+    keys.map(k => `<option value="${k}">${monthLabel(k)}</option>`).join('');
+  if (keys.includes(cur)) sel.value = cur;
+}
+
+function populateAnalyticsMonthFilter() {
+  const allExpKeys = getMonthKeys(expenses);
+  const allRecKeys = getMonthKeys(received);
+  const merged = [...new Set([...allExpKeys, ...allRecKeys])].sort((a,b) => b.localeCompare(a));
+
+  const now = new Date();
+  const curKey = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+
+  // Add current month if not present
+  if (!merged.includes(curKey)) merged.unshift(curKey);
+
+  const sel = document.getElementById('analytics-month-filter');
+  sel.innerHTML = merged.map(k =>
+    `<option value="${k}"${k===curKey?' selected':''}>${monthLabel(k)}</option>`
+  ).join('');
+}
+
+/* ── RENDER EXPENSES ─────────────────────────────────────── */
+function renderExpenses() {
+  const filter = document.getElementById('exp-month-filter').value;
+  const list   = filterByMonth(expenses, filter);
+  const total  = list.reduce((s,e) => s + Number(e.amount), 0);
+
+  const totalEl = document.getElementById('exp-total');
+  if (list.length > 0 || filter !== 'all') {
+    const label = filter === 'all' ? 'All time' : monthLabel(filter);
+    totalEl.innerHTML = `${label} &mdash; Total: <span>${fmt(total)}</span>`;
+  } else {
+    totalEl.textContent = '';
+  }
+
+  const container = document.getElementById('exp-list');
+  if (list.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-title">No expenses yet</div>
+        <div class="empty-state-sub">Tap + to record your first expense.</div>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = list.map(e => `
+    <div class="entry-card">
+      <div class="entry-left">
+        <div class="entry-cat">${escHtml(e.category || 'Uncategorised')}</div>
+        <div class="entry-note">${escHtml(e.note || '—')}</div>
+        <div class="entry-meta">
+          <span>${formatDate(e.date)}</span>
+          <span class="badge badge-${e.method||'cash'}">${e.method||'cash'}</span>
+        </div>
+      </div>
+      <div class="entry-right">
+        <div class="entry-amount amount-expense">${fmt(e.amount)}</div>
+        <div class="entry-actions">
+          <button class="icon-btn" onclick="editExpense('${e.id}')">Edit</button>
+          <button class="icon-btn delete" onclick="promptDelete('${e.id}','expense')">Del</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+/* ── RENDER RECEIVED ─────────────────────────────────────── */
+function renderReceived() {
+  const filter = document.getElementById('rec-month-filter').value;
+  const list   = filterByMonth(received, filter);
+  const total  = list.reduce((s,e) => s + Number(e.amount), 0);
+
+  const totalEl = document.getElementById('rec-total');
+  if (list.length > 0 || filter !== 'all') {
+    const label = filter === 'all' ? 'All time' : monthLabel(filter);
+    totalEl.innerHTML = `${label} &mdash; Total: <span>${fmt(total)}</span>`;
+  } else {
+    totalEl.textContent = '';
+  }
+
+  const container = document.getElementById('rec-list');
+  if (list.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-title">No entries yet</div>
+        <div class="empty-state-sub">Tap + to record money received.</div>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = list.map(e => `
+    <div class="entry-card">
+      <div class="entry-left">
+        <div class="entry-cat">${escHtml(e.source || 'Unknown source')}</div>
+        <div class="entry-note">${escHtml(e.note || '—')}</div>
+        <div class="entry-meta">
+          <span>${formatDate(e.date)}</span>
+          <span class="badge badge-${e.recType||'transfer'}">${e.recType==='gift'?'Gift / Extra':'Transfer'}</span>
+        </div>
+      </div>
+      <div class="entry-right">
+        <div class="entry-amount amount-received">${fmt(e.amount)}</div>
+        <div class="entry-actions">
+          <button class="icon-btn" onclick="editReceived('${e.id}')">Edit</button>
+          <button class="icon-btn delete" onclick="promptDelete('${e.id}','received')">Del</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+/* ── ANALYTICS ───────────────────────────────────────────── */
+function renderAnalytics() {
+  const selEl = document.getElementById('analytics-month-filter');
+  if (!selEl) return;
+
+  // re-populate in case data changed
+  populateAnalyticsMonthFilter();
+
+  const selMonth = selEl.value;
+  const monthExp = filterByMonth(expenses, selMonth);
+  const totalSpent = monthExp.reduce((s,e) => s + Number(e.amount), 0);
+
+  // bar chart title
+  document.getElementById('bar-chart-title').textContent = selMonth ? monthLabel(selMonth) : 'This month';
+
+  // chart colors
+  const isDark = document.body.classList.contains('dark');
+  const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+  const labelColor = isDark ? '#9A9A9A' : '#6B6B6B';
+
+  // ── BAR CHART ──
+  const barCtx = document.getElementById('bar-chart').getContext('2d');
+  if (barChart) barChart.destroy();
+  barChart = new Chart(barCtx, {
+    type: 'bar',
+    data: {
+      labels: ['Budget', 'Spent'],
+      datasets: [{
+        data: [budget, totalSpent],
+        backgroundColor: [
+          isDark ? 'rgba(74,111,165,0.6)' : 'rgba(74,111,165,0.7)',
+          totalSpent > budget
+            ? (isDark ? 'rgba(224,82,82,0.7)' : 'rgba(224,82,82,0.8)')
+            : (isDark ? 'rgba(46,204,113,0.6)' : 'rgba(46,204,113,0.7)')
+        ],
+        borderRadius: 8,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false }, tooltip: {
+        callbacks: { label: ctx => fmt(ctx.raw) }
+      }},
+      scales: {
+        x: { grid: { display: false }, ticks: { color: labelColor, font: { size: 12, family: '-apple-system, BlinkMacSystemFont, Inter, sans-serif' }}},
+        y: { grid: { color: gridColor }, ticks: { color: labelColor, font: { size: 11 }, callback: v => 'PKR ' + (v>=1000 ? (v/1000)+'k' : v) }}
+      }
+    }
+  });
+
+  // ── PIE CHART ──
+  const catTotals = {};
+  monthExp.forEach(e => {
+    const cat = e.category || 'Other';
+    catTotals[cat] = (catTotals[cat] || 0) + Number(e.amount);
+  });
+
+  const pieLabels = Object.keys(catTotals);
+  const pieData   = Object.values(catTotals);
+
+  const palette = [
+    '#4A6FA5','#E05252','#2ECC71','#F39C12','#9B59B6',
+    '#1ABC9C','#E67E22','#3498DB','#E91E63','#607D8B'
+  ];
+
+  const pieCtx = document.getElementById('pie-chart').getContext('2d');
+  if (pieChart) pieChart.destroy();
+  pieChart = new Chart(pieCtx, {
+    type: 'doughnut',
+    data: {
+      labels: pieLabels,
+      datasets: [{
+        data: pieData,
+        backgroundColor: pieLabels.map((_,i) => palette[i % palette.length]),
+        borderWidth: 2,
+        borderColor: isDark ? '#1C1C1E' : '#FFFFFF'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: labelColor,
+            padding: 12,
+            font: { size: 12, family: '-apple-system, BlinkMacSystemFont, Inter, sans-serif' }
+          }
+        },
+        tooltip: { callbacks: { label: ctx => ctx.label + ': ' + fmt(ctx.raw) }}
+      },
+      cutout: '55%'
+    }
+  });
+}
+
+/* ── SETTINGS RENDER ─────────────────────────────────────── */
+function renderSettings() {
+  // budget
+  document.getElementById('budget-input').value = budget || '';
+
+  // categories chips
+  const catList = document.getElementById('cat-chip-list');
+  catList.innerHTML = categories.map((c,i) => `
+    <div class="chip">
+      ${escHtml(c)}
+      <button class="chip-del" onclick="removeCategory(${i})">×</button>
+    </div>`).join('');
+
+  // sources chips
+  const srcList = document.getElementById('src-chip-list');
+  if (sources.length === 0) {
+    srcList.innerHTML = '<span style="font-size:13px;color:var(--text-muted)">No sources saved yet</span>';
+  } else {
+    srcList.innerHTML = sources.map((s,i) => `
+      <div class="chip">
+        ${escHtml(s)}
+        <button class="chip-del" onclick="removeSource(${i})">×</button>
+      </div>`).join('');
+  }
+
+  // populate category select in modal
+  const catSel = document.getElementById('exp-category');
+  catSel.innerHTML = categories.map(c => `<option value="${escHtml(c)}">${escHtml(c)}</option>`).join('');
+
+  // populate source select in modal
+  const srcSel = document.getElementById('rec-source-select');
+  srcSel.innerHTML = '<option value="">Select saved source…</option>' +
+    sources.map(s => `<option value="${escHtml(s)}">${escHtml(s)}</option>`).join('');
+}
+
+async function saveBudget() {
+  const val = parseFloat(document.getElementById('budget-input').value) || 0;
+  budget = val;
+  await metaRef().set({ budget: val }, { merge: true });
+}
+
+async function addCategory() {
+  const inp = document.getElementById('new-cat-input');
+  const val = inp.value.trim();
+  if (!val) return;
+  if (categories.includes(val)) { inp.value=''; return; }
+  categories.push(val);
+  await metaRef().set({ categories }, { merge: true });
+  inp.value = '';
+}
+
+async function removeCategory(i) {
+  categories.splice(i, 1);
+  await metaRef().set({ categories }, { merge: true });
+}
+
+async function addSource() {
+  const inp = document.getElementById('new-src-input');
+  const val = inp.value.trim();
+  if (!val) return;
+  if (sources.includes(val)) { inp.value=''; return; }
+  sources.push(val);
+  await metaRef().set({ sources }, { merge: true });
+  inp.value = '';
+}
+
+async function removeSource(i) {
+  sources.splice(i, 1);
+  await metaRef().set({ sources }, { merge: true });
+}
+
+/* ── MODAL HELPERS ───────────────────────────────────────── */
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function openAddModal() {
+  if (currentTab === 'expenses') {
+    document.getElementById('exp-modal-title').textContent = 'Add Expense';
+    document.getElementById('exp-edit-id').value = '';
+    document.getElementById('exp-amount').value = '';
+    document.getElementById('exp-note').value = '';
+    document.getElementById('exp-date').value = todayISO();
+    selectMethod('cash');
+    renderSettings();
+    openModal('exp-modal');
+  } else if (currentTab === 'received') {
+    document.getElementById('rec-modal-title').textContent = 'Add Received';
+    document.getElementById('rec-edit-id').value = '';
+    document.getElementById('rec-amount').value = '';
+    document.getElementById('rec-note').value = '';
+    document.getElementById('rec-source-new').value = '';
+    document.getElementById('rec-date').value = todayISO();
+    selectRecType('transfer');
+    renderSettings();
+    openModal('rec-modal');
+  }
+}
+
+/* ── EXPENSE CRUD ────────────────────────────────────────── */
+function selectMethod(m) {
+  expMethod = m;
+  document.getElementById('exp-cash-btn').classList.toggle('selected', m==='cash');
+  document.getElementById('exp-bank-btn').classList.toggle('selected', m==='bank');
+}
+
+async function saveExpense() {
+  const amount = parseFloat(document.getElementById('exp-amount').value);
+  if (!amount || amount <= 0) { alert('Enter a valid amount.'); return; }
+  const entry = {
+    amount,
+    category: document.getElementById('exp-category').value,
+    note:     document.getElementById('exp-note').value.trim(),
+    date:     document.getElementById('exp-date').value || todayISO(),
+    method:   expMethod,
+  };
+  const editId = document.getElementById('exp-edit-id').value;
+  if (editId) {
+    await expRef().doc(editId).update(entry);
+  } else {
+    await expRef().add({ ...entry, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+  }
+  closeModal('exp-modal');
+}
+
+function editExpense(id) {
+  const e = expenses.find(x => x.id === id);
+  if (!e) return;
+  document.getElementById('exp-modal-title').textContent = 'Edit Expense';
+  document.getElementById('exp-edit-id').value = id;
+  document.getElementById('exp-amount').value = e.amount;
+  document.getElementById('exp-note').value = e.note || '';
+  document.getElementById('exp-date').value = e.date || todayISO();
+  renderSettings();
+  document.getElementById('exp-category').value = e.category || categories[0];
+  selectMethod(e.method || 'cash');
+  openModal('exp-modal');
+}
+
+/* ── RECEIVED CRUD ───────────────────────────────────────── */
+function selectRecType(t) {
+  recType = t;
+  document.getElementById('rec-transfer-btn').classList.toggle('selected', t==='transfer');
+  document.getElementById('rec-gift-btn').classList.toggle('selected', t==='gift');
+}
+
+async function saveReceived() {
+  const amount = parseFloat(document.getElementById('rec-amount').value);
+  if (!amount || amount <= 0) { alert('Enter a valid amount.'); return; }
+
+  let source = document.getElementById('rec-source-new').value.trim();
+  if (!source) source = document.getElementById('rec-source-select').value;
+  if (!source) { alert('Please enter or select a source.'); return; }
+
+  // auto-save new source
+  if (!sources.includes(source)) {
+    sources.push(source);
+    await metaRef().set({ sources }, { merge: true });
+  }
+
+  const entry = {
+    amount,
+    source,
+    recType,
+    note:  document.getElementById('rec-note').value.trim(),
+    date:  document.getElementById('rec-date').value || todayISO(),
+  };
+
+  const editId = document.getElementById('rec-edit-id').value;
+  if (editId) {
+    await recRef().doc(editId).update(entry);
+  } else {
+    await recRef().add({ ...entry, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+  }
+  closeModal('rec-modal');
+}
+
+function editReceived(id) {
+  const e = received.find(x => x.id === id);
+  if (!e) return;
+  document.getElementById('rec-modal-title').textContent = 'Edit Received';
+  document.getElementById('rec-edit-id').value = id;
+  document.getElementById('rec-amount').value = e.amount;
+  document.getElementById('rec-note').value = e.note || '';
+  document.getElementById('rec-source-new').value = '';
+  document.getElementById('rec-date').value = e.date || todayISO();
+  renderSettings();
+  document.getElementById('rec-source-select').value = e.source || '';
+  selectRecType(e.recType || 'transfer');
+  openModal('rec-modal');
+}
+
+/* ── DELETE ──────────────────────────────────────────────── */
+function promptDelete(id, type) {
+  document.getElementById('del-id').value = id;
+  document.getElementById('del-type').value = type;
+  openModal('del-modal');
+}
+
+async function confirmDelete() {
+  const id   = document.getElementById('del-id').value;
+  const type = document.getElementById('del-type').value;
+  if (type === 'expense') await expRef().doc(id).delete();
+  else await recRef().doc(id).delete();
+  closeModal('del-modal');
+}
+
+/* ── TAB SWITCHING ───────────────────────────────────────── */
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('nav-' + tab).classList.add('active');
+
+  const fab = document.getElementById('fab-btn');
+  if (tab === 'analytics' || tab === 'settings') {
+    fab.style.display = 'none';
+  } else {
+    fab.style.display = 'flex';
+  }
+
+  if (tab === 'analytics') {
+    setTimeout(renderAnalytics, 50);
+  }
+}
+
+/* ── CLOSE MODALS ON OVERLAY CLICK ──────────────────────── */
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) closeModal(overlay.id);
+  });
+});
+
+/* ── UTILS ───────────────────────────────────────────────── */
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  const [y,m,d] = iso.split('-');
+  return `${parseInt(d,10)} ${MONTH_NAMES[parseInt(m,10)-1]} ${y}`;
+}
+
+/* ── INIT THEME ON LOAD ──────────────────────────────────── */
+initTheme();
+</script>
+</body>
+</html>
