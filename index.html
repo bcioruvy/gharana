@@ -11,273 +11,337 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-/* ── TOKENS ─────────────────────────────────────────────── */
+
+/* ══════════════════════════════════════════════════════════
+   DESIGN TOKENS
+══════════════════════════════════════════════════════════ */
 :root {
-  --accent:        #4A6FA5;
-  --accent-dim:    #3a5a8a;
-  --danger:        #C0392B;
-  --expense-col:   #E05252;
-  --received-col:  #2ECC71;
-  --bg:            #F8F8F6;
-  --surface:       #FFFFFF;
-  --surface2:      #F2F2F0;
-  --border:        #E8E8E5;
-  --text-primary:  #1A1A1A;
-  --text-secondary:#6B6B6B;
-  --text-muted:    #A8A8A8;
-  --shadow:        0 2px 8px rgba(0,0,0,0.07), 0 8px 24px rgba(0,0,0,0.05);
-  --shadow-lg:     0 8px 32px rgba(0,0,0,0.12);
-  --radius:        12px;
-  --radius-sm:     8px;
-  /* sidebar */
-  --sidebar-bg:    #2A2A2E;
-  /* nav frosted */
-  --nav-bg:        rgba(255,255,255,0.75);
-  --nav-border:    rgba(0,0,0,0.08);
-}
-body.dark {
-  --bg:            #111111;
-  --surface:       #1C1C1E;
-  --surface2:      #252527;
-  --border:        #2C2C2E;
-  --text-primary:  #F0F0F0;
-  --text-secondary:#9A9A9A;
-  --text-muted:    #555558;
-  --shadow:        0 2px 8px rgba(0,0,0,0.35), 0 8px 24px rgba(0,0,0,0.25);
-  --shadow-lg:     0 8px 32px rgba(0,0,0,0.50);
-  --sidebar-bg:    #0A0A0C;
-  --nav-bg:        rgba(28,28,30,0.80);
-  --nav-border:    rgba(255,255,255,0.06);
+  /* Core palette — 3 colours only */
+  --accent:          #4A6FA5;
+  --accent-dim:      #3a5a8a;
+  --accent-soft:     rgba(74, 111, 165, 0.12);
+
+  /* Surfaces — light mode */
+  --bg:              #F8F8F6;
+  --surface:         #FFFFFF;
+  --surface2:        #F2F2F0;
+  --border:          #E8E8E5;
+  --border-soft:     rgba(0,0,0,0.06);
+
+  /* Text */
+  --text-primary:    #1A1A1A;
+  --text-secondary:  #6B6B6B;
+  --text-muted:      #ABABAB;
+
+  /* Semantic — numbers only, not UI chrome */
+  --expense-col:     #E05252;
+  --received-col:    #2ECC71;
+
+  /* Sidebar (desktop) */
+  --sidebar-bg:      #1E1E22;
+  --sidebar-text:    rgba(255,255,255,0.55);
+  --sidebar-active:  rgba(255,255,255,0.95);
+  --sidebar-active-bg: rgba(255,255,255,0.10);
+  --sidebar-border:  rgba(255,255,255,0.07);
+
+  /* Outer frame (behind app card on desktop) */
+  --frame-bg:        #18181B;
+
+  /* Mobile nav — frosted */
+  --nav-bg:          rgba(248,248,246,0.72);
+  --nav-border:      rgba(0,0,0,0.09);
+
+  /* Misc */
+  --shadow-sm:       0 1px 3px rgba(0,0,0,0.07), 0 2px 8px rgba(0,0,0,0.04);
+  --shadow:          0 2px 8px rgba(0,0,0,0.07), 0 8px 24px rgba(0,0,0,0.05);
+  --shadow-lg:       0 8px 40px rgba(0,0,0,0.14);
+  --radius:          12px;
+  --radius-sm:       8px;
+  --radius-lg:       16px;
 }
 
-/* ── RESET ───────────────────────────────────────────────── */
+body.dark {
+  --bg:              #111113;
+  --surface:         #1C1C1F;
+  --surface2:        #242428;
+  --border:          #2C2C30;
+  --border-soft:     rgba(255,255,255,0.05);
+  --text-primary:    #F0F0F0;
+  --text-secondary:  #8A8A8E;
+  --text-muted:      #48484C;
+  --sidebar-bg:      #0D0D0F;
+  --sidebar-border:  rgba(255,255,255,0.05);
+  --frame-bg:        #0A0A0C;
+  --nav-bg:          rgba(28,28,31,0.78);
+  --nav-border:      rgba(255,255,255,0.07);
+  --shadow-sm:       0 1px 3px rgba(0,0,0,0.30), 0 2px 8px rgba(0,0,0,0.20);
+  --shadow:          0 2px 8px rgba(0,0,0,0.35), 0 8px 24px rgba(0,0,0,0.25);
+  --shadow-lg:       0 8px 40px rgba(0,0,0,0.55);
+}
+
+/* ══════════════════════════════════════════════════════════
+   RESET
+══════════════════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { height: 100%; }
+html, body { height: 100%; overflow: hidden; }
 body {
-  min-height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
-  background: var(--sidebar-bg);
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--frame-bg);
   color: var(--text-primary);
-  transition: background 0.3s;
-  overflow: hidden;
-  height: 100dvh;
+  transition: background 0.3s ease;
 }
 
-/* ── OUTER SHELL (sidebar effect) ────────────────────────── */
-#shell {
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-  height: 100dvh;
-  width: 100%;
-}
-
-/* ── AUTH ────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   AUTH
+══════════════════════════════════════════════════════════ */
 #auth-screen {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: var(--sidebar-bg);
-  z-index: 999;
-  padding: 40px 32px;
-  transition: background 0.3s;
+  position: fixed; inset: 0; z-index: 999;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--frame-bg);
+  padding: 24px;
 }
 .auth-card {
   background: var(--surface);
   border-radius: 20px;
-  padding: 40px 36px;
-  width: 100%;
-  max-width: 360px;
+  padding: 44px 40px;
+  width: 100%; max-width: 340px;
   box-shadow: var(--shadow-lg);
   text-align: center;
 }
 .auth-wordmark {
-  font-size: 28px;
-  font-weight: 300;
-  letter-spacing: 0.14em;
-  color: var(--text-primary);
-  margin-bottom: 6px;
-  text-transform: lowercase;
+  font-size: 26px; font-weight: 300;
+  letter-spacing: 0.16em; text-transform: lowercase;
+  color: var(--text-primary); margin-bottom: 6px;
 }
 .auth-sub {
-  font-size: 12px;
-  color: var(--text-muted);
-  letter-spacing: 0.05em;
-  margin-bottom: 40px;
+  font-size: 12px; color: var(--text-muted);
+  letter-spacing: 0.06em; margin-bottom: 44px;
 }
 .auth-btn {
-  width: 100%;
-  padding: 15px;
+  width: 100%; padding: 14px;
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface2);
   color: var(--text-primary);
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: inherit;
+  font-size: 15px; font-weight: 500;
+  font-family: inherit; cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
+  letter-spacing: 0.01em;
 }
 .auth-btn:hover { border-color: var(--accent); }
 
-/* ── APP CARD ────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   APP SHELL  —  MOBILE (default)
+══════════════════════════════════════════════════════════ */
 #app {
   display: none;
-  flex-direction: column;
-  width: 100%;
-  max-width: 500px;
-  height: 100dvh;
+  width: 100%; height: 100dvh;
   background: var(--bg);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 60px rgba(0,0,0,0.35);
-  transition: background 0.3s, box-shadow 0.3s;
+  transition: background 0.3s;
 }
 
-/* ── SCREENS ─────────────────────────────────────────────── */
+/* screens */
 .screen {
-  position: absolute;
-  inset: 0;
-  overflow-y: auto;
-  padding-bottom: 82px;
-  opacity: 0;
-  pointer-events: none;
+  position: absolute; inset: 0;
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding-bottom: 80px;
+  opacity: 0; pointer-events: none;
   transform: translateY(5px);
   transition: opacity 0.18s ease, transform 0.18s ease;
   will-change: opacity, transform;
   background: var(--bg);
-  -webkit-overflow-scrolling: touch;
 }
-.screen.active {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
-}
+.screen.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
 
-/* ── TOPBAR ──────────────────────────────────────────────── */
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 20px 10px;
-  background: var(--bg);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  transition: background 0.3s;
-}
-.topbar-title {
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: -0.4px;
-  color: var(--text-primary);
-}
-
-/* ── BOTTOM NAV — FROSTED GLASS ──────────────────────────── */
+/* ── MOBILE: bottom nav ──────────────────────────────────── */
 .bottom-nav {
-  position: absolute;
-  bottom: 0;
-  left: 0; right: 0;
+  position: absolute; bottom: 0; left: 0; right: 0;
   background: var(--nav-bg);
-  border-top: 1px solid var(--nav-border);
+  border-top: 0.5px solid var(--nav-border);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  display: flex;
-  z-index: 30;
+  display: flex; z-index: 30;
   padding-bottom: env(safe-area-inset-bottom);
 }
 .nav-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px 0 12px;
-  gap: 3px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-muted);
-  font-family: inherit;
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; padding: 10px 4px 12px; gap: 3px;
+  background: none; border: none; cursor: pointer;
+  color: var(--text-muted); font-family: inherit;
   transition: color 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
 .nav-item.active { color: var(--accent); }
 .nav-dot {
-  width: 4px; height: 4px;
-  border-radius: 50%;
-  background: var(--accent);
-  opacity: 0;
-  transition: opacity 0.2s;
-  margin-bottom: 1px;
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--accent); opacity: 0;
+  transition: opacity 0.2s; margin-bottom: 1px;
 }
 .nav-item.active .nav-dot { opacity: 1; }
 .nav-label { font-size: 10px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
 
 /* ── FAB ─────────────────────────────────────────────────── */
 .fab {
-  position: absolute;
-  bottom: 88px;
-  right: 20px;
-  width: 52px; height: 52px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
-  font-size: 26px;
-  font-weight: 300;
-  border: none;
-  cursor: pointer;
+  position: absolute; bottom: 88px; right: 20px;
+  width: 50px; height: 50px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  font-size: 26px; font-weight: 300; border: none;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
   box-shadow: 0 4px 16px rgba(74,111,165,0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.15s, box-shadow 0.15s;
-  z-index: 20;
-  line-height: 1;
+  transition: transform 0.15s; z-index: 20; line-height: 1;
 }
-.fab:active { transform: scale(0.93); }
+.fab:active { transform: scale(0.92); }
 
-/* ── FILTER BAR ──────────────────────────────────────────── */
-.filter-bar { padding: 0 20px 12px; }
+/* ══════════════════════════════════════════════════════════
+   APP SHELL  —  TABLET / DESKTOP  (≥ 768px)
+══════════════════════════════════════════════════════════ */
+@media (min-width: 768px) {
+
+  #app {
+    display: none; /* overridden by JS when logged in */
+    max-width: 1100px;
+    margin: 0 auto;
+    height: 100dvh;
+    flex-direction: row;
+    box-shadow: 0 0 80px rgba(0,0,0,0.5);
+  }
+
+  /* left sidebar */
+  .sidebar {
+    display: flex !important;
+    flex-direction: column;
+    width: 220px; flex-shrink: 0;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--sidebar-border);
+    padding: 36px 0 28px;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .sidebar-wordmark {
+    font-size: 15px; font-weight: 300;
+    letter-spacing: 0.18em; text-transform: lowercase;
+    color: var(--sidebar-active); padding: 0 24px;
+    margin-bottom: 6px;
+  }
+  .sidebar-sub {
+    font-size: 11px; color: var(--sidebar-text);
+    letter-spacing: 0.05em; padding: 0 24px;
+    margin-bottom: 32px;
+  }
+  .sidebar-nav { flex: 1; display: flex; flex-direction: column; gap: 2px; padding: 0 12px; }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 14px; border-radius: var(--radius-sm);
+    background: none; border: none; cursor: pointer;
+    color: var(--sidebar-text); font-family: inherit;
+    font-size: 14px; font-weight: 500; letter-spacing: 0.01em;
+    transition: color 0.15s, background 0.15s;
+    text-align: left; width: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .sidebar-item:hover { color: var(--sidebar-active); background: var(--sidebar-active-bg); }
+  .sidebar-item.active { color: var(--sidebar-active); background: var(--sidebar-active-bg); }
+  .sidebar-item-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); opacity: 0; flex-shrink: 0;
+    transition: opacity 0.2s;
+  }
+  .sidebar-item.active .sidebar-item-dot { opacity: 1; }
+  .sidebar-divider { height: 1px; background: var(--sidebar-border); margin: 12px 12px; }
+  .sidebar-footer { padding: 0 24px; }
+  .sidebar-user-name  { font-size: 13px; font-weight: 500; color: var(--sidebar-active); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sidebar-user-email { font-size: 11px; color: var(--sidebar-text); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* main content area */
+  .main-content {
+    flex: 1; overflow: hidden; position: relative;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+  }
+
+  /* screens fill the main area */
+  .screen {
+    padding-bottom: 40px;
+  }
+
+  /* hide mobile nav & fab */
+  .bottom-nav { display: none !important; }
+  .fab        { right: 32px; bottom: 32px; position: fixed; }
+
+  /* topbar tweak */
+  .topbar { padding: 28px 32px 12px; }
+  .topbar-title { font-size: 26px; }
+
+  /* widen content padding */
+  .filter-bar    { padding: 0 32px 12px; }
+  .month-total   { padding: 0 32px 14px; }
+  .entry-list    { padding: 0 32px; }
+  .analytics-section    { padding: 0 32px; }
+  .analytics-filter-bar { padding: 0 32px 12px; }
+  .settings-section     { padding: 0 32px; }
+  .dash-lifetime  { margin: 8px 32px 0; }
+  .dash-cur-month { margin: 12px 32px 0; }
+  .dash-budget-card     { margin: 10px 32px 0; }
+  .dash-section-title   { padding: 16px 32px 10px; }
+  .dash-chart-card      { margin: 0 32px 12px; }
+
+  /* two-col dashboard charts on desktop */
+  .dash-charts-row {
+    display: flex; gap: 16px;
+    margin: 0 32px 12px;
+  }
+  .dash-charts-row .dash-chart-card {
+    flex: 1; margin: 0;
+  }
+}
+
+/* hide sidebar on mobile */
+.sidebar { display: none; }
+.main-content { flex: 1; position: relative; overflow: hidden; }
+
+/* ══════════════════════════════════════════════════════════
+   TOPBAR
+══════════════════════════════════════════════════════════ */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 20px 10px;
+  background: var(--bg);
+  position: sticky; top: 0; z-index: 10;
+  transition: background 0.3s;
+}
+.topbar-title { font-size: 22px; font-weight: 600; letter-spacing: -0.4px; color: var(--text-primary); }
+
+/* ══════════════════════════════════════════════════════════
+   FILTER & TOTALS
+══════════════════════════════════════════════════════════ */
+.filter-bar  { padding: 0 20px 12px; }
 .filter-select {
-  width: 100%;
-  padding: 10px 36px 10px 14px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--text-primary);
+  width: 100%; padding: 10px 36px 10px 14px;
+  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--text-primary);
   font-size: 14px; font-family: inherit;
   appearance: none; -webkit-appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6B6B' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  cursor: pointer;
+  background-repeat: no-repeat; background-position: right 14px center;
+  cursor: pointer; transition: border-color 0.2s;
 }
 .filter-select:focus { outline: none; border-color: var(--accent); }
-
-.month-total {
-  font-size: 13px;
-  color: var(--text-secondary);
-  padding: 0 20px 14px;
-  font-weight: 500;
-  min-height: 18px;
-}
+.month-total { font-size: 13px; color: var(--text-secondary); padding: 0 20px 14px; font-weight: 500; min-height: 18px; }
 .month-total span { color: var(--text-primary); font-weight: 700; }
 
-/* ── ENTRY LIST ──────────────────────────────────────────── */
-.entry-list { padding: 0 20px; display: flex; flex-direction: column; gap: 10px; }
-.entry-card {
-  background: var(--surface);
-  border-radius: var(--radius);
-  padding: 14px 16px;
-  box-shadow: var(--shadow);
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
+/* ══════════════════════════════════════════════════════════
+   ENTRY CARDS
+══════════════════════════════════════════════════════════ */
+.entry-list  { padding: 0 20px; display: flex; flex-direction: column; gap: 10px; }
+.entry-card  {
+  background: var(--surface); border-radius: var(--radius);
+  padding: 14px 16px; box-shadow: var(--shadow-sm);
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
 }
 .entry-left  { flex: 1; min-width: 0; }
 .entry-cat   { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 3px; }
@@ -289,168 +353,164 @@ body {
 .amount-received { color: var(--received-col); }
 .entry-actions { display: flex; gap: 4px; }
 .icon-btn {
-  background: none; border: none; cursor: pointer;
-  color: var(--text-muted); font-size: 12px;
-  padding: 4px 7px; border-radius: 6px;
-  font-family: inherit; transition: color 0.15s, background 0.15s;
+  background: none; border: none; cursor: pointer; color: var(--text-muted);
+  font-size: 12px; padding: 4px 7px; border-radius: 6px; font-family: inherit;
+  transition: color 0.15s, background 0.15s;
 }
 .icon-btn:hover        { color: var(--text-primary); background: var(--surface2); }
-.icon-btn.delete:hover { color: var(--danger); }
+.icon-btn.delete:hover { color: var(--expense-col); }
 
-.badge {
-  display: inline-block; padding: 2px 7px; border-radius: 20px;
-  font-size: 10px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
-}
-.badge-cash     { background: #FEF3C7; color: #92400E; }
-.badge-bank     { background: #DBEAFE; color: #1E40AF; }
-.badge-transfer { background: #EDE9FE; color: #5B21B6; }
-.badge-gift     { background: #FCE7F3; color: #9D174D; }
-body.dark .badge-cash     { background: #3D2E08; color: #D97706; }
-body.dark .badge-bank     { background: #1E3A5F; color: #60A5FA; }
-body.dark .badge-transfer { background: #2D1F5E; color: #A78BFA; }
-body.dark .badge-gift     { background: #3D1040; color: #F472B6; }
+/* badges — minimal, 2 colours only */
+.badge { display: inline-block; padding: 2px 7px; border-radius: 20px; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.badge-cash     { background: rgba(74,111,165,0.10); color: var(--accent); }
+.badge-bank     { background: rgba(74,111,165,0.10); color: var(--accent); }
+.badge-transfer { background: rgba(74,111,165,0.10); color: var(--accent); }
+.badge-gift     { background: rgba(224,82,82,0.10);  color: var(--expense-col); }
+body.dark .badge-cash, body.dark .badge-bank, body.dark .badge-transfer { background: rgba(74,111,165,0.18); }
+body.dark .badge-gift { background: rgba(224,82,82,0.18); }
 
-/* ── EMPTY & LOADING ─────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   EMPTY & LOADING
+══════════════════════════════════════════════════════════ */
 .empty-state { text-align: center; padding: 60px 32px; }
 .empty-state-title { font-size: 15px; font-weight: 500; margin-bottom: 6px; color: var(--text-secondary); }
 .empty-state-sub   { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
-.loading-dots { display: flex; gap: 6px; align-items: center; justify-content: center; padding: 48px; }
-.loading-dots span { width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); animation: pulse 1.2s ease-in-out infinite; }
+.loading-dots { display: flex; gap: 6px; align-items: center; justify-content: center; padding: 60px; }
+.loading-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); animation: pulse 1.2s ease-in-out infinite; }
 .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
 .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes pulse { 0%,80%,100%{opacity:.3;transform:scale(.9)} 40%{opacity:1;transform:scale(1)} }
+@keyframes pulse { 0%,80%,100%{opacity:.3;transform:scale(.85)} 40%{opacity:1;transform:scale(1)} }
 
-/* ── DASHBOARD ───────────────────────────────────────────── */
-.dash-lifetime {
-  display: flex; gap: 10px;
-  margin: 8px 20px 0;
-}
-.dash-lifetime-card {
-  flex: 1;
-  background: var(--surface);
-  border-radius: var(--radius);
-  padding: 16px;
-  box-shadow: var(--shadow);
-}
+/* ══════════════════════════════════════════════════════════
+   DASHBOARD
+══════════════════════════════════════════════════════════ */
+.dash-lifetime { display: flex; gap: 10px; margin: 8px 20px 0; }
+.dash-lifetime-card { flex: 1; background: var(--surface); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow-sm); }
 .dash-lifetime-label { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
-.dash-lifetime-value { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+.dash-lifetime-value { font-size: 18px; font-weight: 700; letter-spacing: -0.4px; }
 
-.dash-cur-month {
-  margin: 12px 20px 0;
-  background: var(--accent);
-  border-radius: 16px;
-  padding: 18px 20px;
-  color: #fff;
-}
-.dash-cur-label  { font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; opacity: 0.75; margin-bottom: 4px; }
-.dash-cur-amount { font-size: 30px; font-weight: 700; letter-spacing: -0.8px; margin-bottom: 2px; }
-.dash-cur-sub    { font-size: 13px; opacity: 0.75; }
+.dash-cur-month { margin: 12px 20px 0; background: var(--accent); border-radius: var(--radius-lg); padding: 20px 22px; color: #fff; }
+.dash-cur-label  { font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; opacity: 0.72; margin-bottom: 4px; }
+.dash-cur-amount { font-size: 32px; font-weight: 700; letter-spacing: -1px; margin-bottom: 2px; }
+.dash-cur-sub    { font-size: 13px; opacity: 0.72; }
 
-.dash-budget-card {
-  margin: 10px 20px 0;
-  background: var(--surface);
-  border-radius: var(--radius);
-  padding: 16px;
-  box-shadow: var(--shadow);
-}
+.dash-budget-card { margin: 10px 20px 0; background: var(--surface); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow-sm); }
 .dash-budget-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
 .dash-budget-title  { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
-.progress-track { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
-.progress-fill  { height: 100%; border-radius: 3px; transition: width 0.5s ease; background: var(--received-col); }
-.progress-fill.warning { background: #F39C12; }
+.progress-track { height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+.progress-fill  { height: 100%; border-radius: 3px; transition: width 0.6s ease; background: var(--received-col); }
+.progress-fill.warning { background: #F0A500; }
 .progress-fill.over    { background: var(--expense-col); }
 .dash-budget-sub { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
 
-.dash-section-title {
-  font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
-  color: var(--text-muted); padding: 16px 20px 10px;
-}
-.dash-chart-card {
-  margin: 0 20px 10px;
-  background: var(--surface);
-  border-radius: var(--radius);
-  padding: 16px;
-  box-shadow: var(--shadow);
-}
-.dash-chart-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 14px; }
+.dash-section-title { font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); padding: 16px 20px 10px; }
+.dash-chart-card { margin: 0 20px 12px; background: var(--surface); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow-sm); }
+.dash-chart-title { font-size: 12px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 14px; }
+.dash-charts-row { display: flex; flex-direction: column; }
 
-/* ── ANALYTICS ───────────────────────────────────────────── */
-.analytics-section  { padding: 0 20px; margin-bottom: 20px; }
-.section-label      { font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
-.chart-card         { background: var(--surface); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); }
+/* ══════════════════════════════════════════════════════════
+   ANALYTICS
+══════════════════════════════════════════════════════════ */
 .analytics-filter-bar { padding: 0 20px 12px; }
+.analytics-section    { padding: 0 20px; margin-bottom: 20px; }
+.section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
+.chart-card { background: var(--surface); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow-sm); }
 
-/* ── SETTINGS ────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   SETTINGS
+══════════════════════════════════════════════════════════ */
 .settings-section       { padding: 0 20px; margin-bottom: 24px; }
 .settings-section-title { font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
-.settings-card          { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
-.settings-row           { display: flex; align-items: center; justify-content: space-between; padding: 15px 16px; border-bottom: 1px solid var(--border); gap: 12px; }
-.settings-row:last-child{ border-bottom: none; }
-.settings-row-label     { font-size: 15px; font-weight: 500; color: var(--text-primary); }
-.settings-row-sub       { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-.toggle-switch          { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
-.toggle-switch input    { display: none; }
-.toggle-track           { position: absolute; inset: 0; background: var(--border); border-radius: 13px; cursor: pointer; transition: background 0.2s; }
+.settings-card  { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; }
+.settings-row   { display: flex; align-items: center; justify-content: space-between; padding: 15px 16px; border-bottom: 1px solid var(--border); gap: 12px; }
+.settings-row:last-child { border-bottom: none; }
+.settings-row-label { font-size: 15px; font-weight: 500; color: var(--text-primary); }
+.settings-row-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+/* toggle */
+.toggle-switch       { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
+.toggle-switch input { display: none; }
+.toggle-track        { position: absolute; inset: 0; background: var(--border); border-radius: 13px; cursor: pointer; transition: background 0.2s; }
 .toggle-switch input:checked + .toggle-track { background: var(--accent); }
-.toggle-thumb           { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: #fff; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+.toggle-thumb        { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: #fff; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
 .toggle-switch input:checked ~ .toggle-thumb { transform: translateX(18px); }
-.chip-list   { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
-.chip        { padding: 6px 12px; border-radius: 20px; background: var(--surface2); border: 1.5px solid var(--border); font-size: 13px; color: var(--text-primary); display: flex; align-items: center; gap: 6px; }
-.chip-del    { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; line-height: 1; padding: 0; }
-.chip-del:hover { color: var(--danger); }
+/* chips */
+.chip-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.chip      { padding: 6px 12px; border-radius: 20px; background: var(--surface2); border: 1.5px solid var(--border); font-size: 13px; color: var(--text-primary); display: flex; align-items: center; gap: 6px; }
+.chip-del  { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; line-height: 1; padding: 0; }
+.chip-del:hover { color: var(--expense-col); }
 .add-chip-row   { display: flex; gap: 8px; margin-top: 12px; }
-.add-chip-input { flex: 1; padding: 10px 13px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--surface2); color: var(--text-primary); font-size: 14px; font-family: inherit; }
-.add-chip-input:focus { outline: none; border-color: var(--accent); }
+.add-chip-input { flex: 1; padding: 10px 13px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--surface2); color: var(--text-primary); font-size: 14px; font-family: inherit; transition: border-color 0.2s; }
+.add-chip-input:focus { outline: none; border-color: var(--accent); background: var(--surface); }
 .add-chip-btn   { padding: 10px 16px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; }
+/* budget */
 .budget-inline-edit  { display: flex; align-items: center; gap: 8px; }
-.budget-inline-input { width: 110px; padding: 7px 10px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--surface2); color: var(--text-primary); font-size: 14px; font-family: inherit; text-align: right; }
+.budget-inline-input { width: 110px; padding: 7px 10px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--surface2); color: var(--text-primary); font-size: 14px; font-family: inherit; text-align: right; transition: border-color 0.2s; }
 .budget-inline-input:focus { outline: none; border-color: var(--accent); }
-.budget-save-btn { padding: 7px 13px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; }
-.danger-btn { width: 100%; padding: 14px; background: none; border: 1.5px solid var(--danger); color: var(--danger); border-radius: var(--radius); font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer; transition: background 0.15s; }
-.danger-btn:hover { background: rgba(192,57,43,0.06); }
+.budget-save-btn { padding: 7px 14px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; }
+.danger-btn { width: 100%; padding: 14px; background: none; border: 1.5px solid var(--expense-col); color: var(--expense-col); border-radius: var(--radius); font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer; transition: background 0.15s; }
+.danger-btn:hover { background: rgba(224,82,82,0.06); }
 
-/* ── MODAL ───────────────────────────────────────────────── */
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; align-items: flex-end; justify-content: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+/* ══════════════════════════════════════════════════════════
+   MODAL — BOTTOM SHEET
+══════════════════════════════════════════════════════════ */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; align-items: flex-end; justify-content: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 .modal-overlay.open { display: flex; }
-.modal { background: var(--surface); border-radius: 20px 20px 0 0; padding: 24px 24px 40px; width: 100%; max-width: 500px; max-height: 92dvh; overflow-y: auto; animation: slideUp 0.22s ease; }
+.modal { background: var(--surface); border-radius: 20px 20px 0 0; padding: 24px 24px 44px; width: 100%; max-width: 600px; max-height: 92dvh; overflow-y: auto; animation: slideUp 0.22s ease; }
 @keyframes slideUp { from{transform:translateY(40px);opacity:0} to{transform:translateY(0);opacity:1} }
-.modal-header  { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
-.modal-title   { font-size: 18px; font-weight: 600; letter-spacing: -0.2px; }
-.modal-close   { width: 30px; height: 30px; border-radius: 50%; background: var(--surface2); border: none; cursor: pointer; color: var(--text-secondary); font-size: 18px; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+.modal-title  { font-size: 18px; font-weight: 600; letter-spacing: -0.2px; }
+.modal-close  { width: 30px; height: 30px; border-radius: 50%; background: var(--surface2); border: none; cursor: pointer; color: var(--text-secondary); font-size: 18px; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
 .modal-close:hover { background: var(--border); }
 
-/* ── FORM ────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   FORM
+══════════════════════════════════════════════════════════ */
 .form-group  { margin-bottom: 16px; }
 .form-label  { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 7px; }
-.form-input, .form-select { width: 100%; padding: 13px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--surface2); color: var(--text-primary); font-size: 15px; font-family: inherit; transition: border-color 0.2s; appearance: none; -webkit-appearance: none; }
+.form-input, .form-select { width: 100%; padding: 13px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--surface2); color: var(--text-primary); font-size: 15px; font-family: inherit; transition: border-color 0.2s, background 0.2s; appearance: none; -webkit-appearance: none; }
 .form-input:focus, .form-select:focus { outline: none; border-color: var(--accent); background: var(--surface); }
 .form-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6B6B' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; cursor: pointer; }
-.toggle-row  { display: flex; gap: 8px; }
-.toggle-btn  { flex: 1; padding: 11px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--surface2); color: var(--text-secondary); font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; transition: all 0.15s; text-align: center; }
+.toggle-row { display: flex; gap: 8px; }
+.toggle-btn { flex: 1; padding: 11px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--surface2); color: var(--text-secondary); font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; transition: all 0.15s; text-align: center; }
 .toggle-btn.selected { border-color: var(--accent); color: var(--accent); background: var(--surface); font-weight: 600; }
-.submit-btn  { width: 100%; padding: 15px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius); font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer; margin-top: 8px; transition: background 0.15s, transform 0.1s; }
+.submit-btn { width: 100%; padding: 15px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius); font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer; margin-top: 8px; letter-spacing: 0.01em; transition: background 0.15s, transform 0.1s; }
 .submit-btn:hover  { background: var(--accent-dim); }
 .submit-btn:active { transform: scale(0.98); }
 
-/* ── CONFIRM MODAL ───────────────────────────────────────── */
-.confirm-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); padding: 24px; }
-.confirm-modal-overlay.open { display: flex; }
-.confirm-modal { background: var(--surface); border-radius: 16px; padding: 28px 24px 24px; width: 100%; max-width: 320px; box-shadow: var(--shadow-lg); animation: fadeScale 0.18s ease; }
-@keyframes fadeScale { from{transform:scale(0.94);opacity:0} to{transform:scale(1);opacity:1} }
+/* ══════════════════════════════════════════════════════════
+   CONFIRM DIALOG
+══════════════════════════════════════════════════════════ */
+.confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 24px; }
+.confirm-overlay.open { display: flex; }
+.confirm-card  { background: var(--surface); border-radius: var(--radius-lg); padding: 28px 24px 24px; width: 100%; max-width: 320px; box-shadow: var(--shadow-lg); animation: popIn 0.18s ease; }
+@keyframes popIn { from{transform:scale(0.93);opacity:0} to{transform:scale(1);opacity:1} }
 .confirm-title { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
 .confirm-sub   { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.5; }
 .confirm-btns  { display: flex; gap: 10px; }
-.confirm-cancel { flex: 1; padding: 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: none; color: var(--text-primary); font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; }
-.confirm-ok     { flex: 1; padding: 12px; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; }
+.confirm-cancel { flex: 1; padding: 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: none; color: var(--text-primary); font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; transition: background 0.15s; }
+.confirm-cancel:hover { background: var(--surface2); }
+.confirm-ok { flex: 1; padding: 12px; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; }
 
-/* ── TOAST ───────────────────────────────────────────────── */
-#toast { position: fixed; bottom: 108px; left: 50%; transform: translateX(-50%) translateY(16px); background: var(--text-primary); color: var(--bg); padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 500; opacity: 0; transition: opacity 0.2s, transform 0.2s; pointer-events: none; z-index: 300; white-space: nowrap; }
+/* ══════════════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════════════ */
+#toast {
+  position: fixed; bottom: 100px; left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  background: var(--text-primary); color: var(--bg);
+  padding: 10px 20px; border-radius: 20px;
+  font-size: 13px; font-weight: 500;
+  opacity: 0; transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none; z-index: 400; white-space: nowrap;
+}
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+@media (min-width: 768px) {
+  #toast { bottom: 32px; }
+}
+
 </style>
 </head>
 <body>
-
-<div id="shell">
 
 <!-- AUTH -->
 <div id="auth-screen">
@@ -464,133 +524,157 @@ body.dark .badge-gift     { background: #3D1040; color: #F472B6; }
 <!-- APP -->
 <div id="app">
 
-  <!-- DASHBOARD -->
-  <div id="tab-dashboard" class="screen active">
-    <div class="topbar"><div class="topbar-title">Overview</div></div>
-    <div id="dash-content"><div class="loading-dots"><span></span><span></span><span></span></div></div>
-  </div>
-
-  <!-- EXPENSES -->
-  <div id="tab-expenses" class="screen">
-    <div class="topbar"><div class="topbar-title">Expenses</div></div>
-    <div class="filter-bar">
-      <select class="filter-select" id="exp-month-filter" onchange="renderExpenses()">
-        <option value="all">All months</option>
-      </select>
+  <!-- SIDEBAR (tablet/desktop only) -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-wordmark">gharana</div>
+    <div class="sidebar-sub">household finance</div>
+    <nav class="sidebar-nav">
+      <button class="sidebar-item active" onclick="switchTab('dashboard')" id="snav-dashboard">
+        <div class="sidebar-item-dot"></div>Overview
+      </button>
+      <button class="sidebar-item" onclick="switchTab('expenses')" id="snav-expenses">
+        <div class="sidebar-item-dot"></div>Expenses
+      </button>
+      <button class="sidebar-item" onclick="switchTab('received')" id="snav-received">
+        <div class="sidebar-item-dot"></div>Received
+      </button>
+      <button class="sidebar-item" onclick="switchTab('analytics')" id="snav-analytics">
+        <div class="sidebar-item-dot"></div>Analytics
+      </button>
+      <div class="sidebar-divider"></div>
+      <button class="sidebar-item" onclick="switchTab('settings')" id="snav-settings">
+        <div class="sidebar-item-dot"></div>Settings
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user-name"  id="sidebar-name">—</div>
+      <div class="sidebar-user-email" id="sidebar-email">—</div>
     </div>
-    <div class="month-total" id="exp-total"></div>
-    <div class="entry-list" id="exp-list"><div class="loading-dots"><span></span><span></span><span></span></div></div>
-  </div>
+  </aside>
 
-  <!-- RECEIVED -->
-  <div id="tab-received" class="screen">
-    <div class="topbar"><div class="topbar-title">Received</div></div>
-    <div class="filter-bar">
-      <select class="filter-select" id="rec-month-filter" onchange="renderReceived()">
-        <option value="all">All months</option>
-      </select>
-    </div>
-    <div class="month-total" id="rec-total"></div>
-    <div class="entry-list" id="rec-list"><div class="loading-dots"><span></span><span></span><span></span></div></div>
-  </div>
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
 
-  <!-- ANALYTICS -->
-  <div id="tab-analytics" class="screen">
-    <div class="topbar"><div class="topbar-title">Analytics</div></div>
-    <div class="analytics-filter-bar">
-      <select class="filter-select" id="analytics-month-filter" onchange="renderAnalytics()"></select>
+    <!-- DASHBOARD -->
+    <div id="tab-dashboard" class="screen active">
+      <div class="topbar"><div class="topbar-title">Overview</div></div>
+      <div id="dash-content"><div class="loading-dots"><span></span><span></span><span></span></div></div>
     </div>
-    <div class="analytics-section">
-      <div class="section-label">Budget vs Spent</div>
-      <div class="chart-card">
-        <div class="dash-chart-title" id="bar-chart-title">—</div>
-        <canvas id="bar-chart" height="160"></canvas>
+
+    <!-- EXPENSES -->
+    <div id="tab-expenses" class="screen">
+      <div class="topbar"><div class="topbar-title">Expenses</div></div>
+      <div class="filter-bar">
+        <select class="filter-select" id="exp-month-filter" onchange="renderExpenses()"><option value="all">All months</option></select>
+      </div>
+      <div class="month-total" id="exp-total"></div>
+      <div class="entry-list" id="exp-list"><div class="loading-dots"><span></span><span></span><span></span></div></div>
+    </div>
+
+    <!-- RECEIVED -->
+    <div id="tab-received" class="screen">
+      <div class="topbar"><div class="topbar-title">Received</div></div>
+      <div class="filter-bar">
+        <select class="filter-select" id="rec-month-filter" onchange="renderReceived()"><option value="all">All months</option></select>
+      </div>
+      <div class="month-total" id="rec-total"></div>
+      <div class="entry-list" id="rec-list"><div class="loading-dots"><span></span><span></span><span></span></div></div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div id="tab-analytics" class="screen">
+      <div class="topbar"><div class="topbar-title">Analytics</div></div>
+      <div class="analytics-filter-bar">
+        <select class="filter-select" id="analytics-month-filter" onchange="renderAnalytics()"></select>
+      </div>
+      <div class="analytics-section">
+        <div class="section-label">Budget vs Spent</div>
+        <div class="chart-card"><canvas id="bar-chart" height="160"></canvas></div>
+      </div>
+      <div class="analytics-section">
+        <div class="section-label">Expenses by Category</div>
+        <div class="chart-card" id="pie-wrapper"><canvas id="pie-chart" height="220"></canvas></div>
       </div>
     </div>
-    <div class="analytics-section">
-      <div class="section-label">By Category</div>
-      <div class="chart-card" id="pie-wrapper"><canvas id="pie-chart" height="220"></canvas></div>
-    </div>
-  </div>
 
-  <!-- SETTINGS -->
-  <div id="tab-settings" class="screen">
-    <div class="topbar"><div class="topbar-title">Settings</div></div>
-    <div style="padding-top:8px;">
-      <div class="settings-section">
-        <div class="settings-section-title">Appearance</div>
-        <div class="settings-card">
-          <div class="settings-row">
-            <div><div class="settings-row-label">Dark Mode</div></div>
-            <label class="toggle-switch">
-              <input type="checkbox" id="dark-toggle" onchange="toggleDark(this.checked)">
-              <div class="toggle-track"></div><div class="toggle-thumb"></div>
-            </label>
-          </div>
-        </div>
-      </div>
-      <div class="settings-section">
-        <div class="settings-section-title">Budget</div>
-        <div class="settings-card">
-          <div class="settings-row">
-            <div><div class="settings-row-label">Monthly Budget</div><div class="settings-row-sub">Used in Analytics and Overview</div></div>
-            <div class="budget-inline-edit">
-              <input class="budget-inline-input" type="number" id="budget-input" placeholder="0" />
-              <button class="budget-save-btn" onclick="saveBudget()">Save</button>
+    <!-- SETTINGS -->
+    <div id="tab-settings" class="screen">
+      <div class="topbar"><div class="topbar-title">Settings</div></div>
+      <div style="padding-top:8px">
+        <div class="settings-section">
+          <div class="settings-section-title">Appearance</div>
+          <div class="settings-card">
+            <div class="settings-row">
+              <div><div class="settings-row-label">Dark Mode</div></div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="dark-toggle" onchange="toggleDark(this.checked)">
+                <div class="toggle-track"></div><div class="toggle-thumb"></div>
+              </label>
             </div>
           </div>
         </div>
-      </div>
-      <div class="settings-section">
-        <div class="settings-section-title">Categories</div>
-        <div class="settings-card" style="padding:16px;">
-          <div class="chip-list" id="cat-chip-list"></div>
-          <div class="add-chip-row">
-            <input class="add-chip-input" type="text" id="new-cat-input" placeholder="Add category…" />
-            <button class="add-chip-btn" onclick="addCategory()">Add</button>
-          </div>
-        </div>
-      </div>
-      <div class="settings-section">
-        <div class="settings-section-title">Sources</div>
-        <div class="settings-card" style="padding:16px;">
-          <div class="chip-list" id="src-chip-list"></div>
-          <div class="add-chip-row">
-            <input class="add-chip-input" type="text" id="new-src-input" placeholder="Add source…" />
-            <button class="add-chip-btn" onclick="addSource()">Add</button>
-          </div>
-        </div>
-      </div>
-      <div class="settings-section">
-        <div class="settings-section-title">Account</div>
-        <div class="settings-card">
-          <div class="settings-row">
-            <div>
-              <div class="settings-row-label" id="user-name-display">—</div>
-              <div class="settings-row-sub"   id="user-email-display">—</div>
+        <div class="settings-section">
+          <div class="settings-section-title">Budget</div>
+          <div class="settings-card">
+            <div class="settings-row">
+              <div><div class="settings-row-label">Monthly Budget</div><div class="settings-row-sub">Used in Analytics and Overview</div></div>
+              <div class="budget-inline-edit">
+                <input class="budget-inline-input" type="number" id="budget-input" placeholder="0" />
+                <button class="budget-save-btn" onclick="saveBudget()">Save</button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="settings-section">
-        <button class="danger-btn" onclick="promptSignOut()">Sign Out</button>
+        <div class="settings-section">
+          <div class="settings-section-title">Categories</div>
+          <div class="settings-card" style="padding:16px">
+            <div class="chip-list" id="cat-chip-list"></div>
+            <div class="add-chip-row">
+              <input class="add-chip-input" type="text" id="new-cat-input" placeholder="Add category…" />
+              <button class="add-chip-btn" onclick="addCategory()">Add</button>
+            </div>
+          </div>
+        </div>
+        <div class="settings-section">
+          <div class="settings-section-title">Sources</div>
+          <div class="settings-card" style="padding:16px">
+            <div class="chip-list" id="src-chip-list"></div>
+            <div class="add-chip-row">
+              <input class="add-chip-input" type="text" id="new-src-input" placeholder="Add source…" />
+              <button class="add-chip-btn" onclick="addSource()">Add</button>
+            </div>
+          </div>
+        </div>
+        <div class="settings-section">
+          <div class="settings-section-title">Account</div>
+          <div class="settings-card">
+            <div class="settings-row">
+              <div>
+                <div class="settings-row-label" id="user-name-display">—</div>
+                <div class="settings-row-sub"   id="user-email-display">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="settings-section">
+          <button class="danger-btn" onclick="promptSignOut()">Sign Out</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- NAV -->
-  <nav class="bottom-nav">
-    <button class="nav-item active" onclick="switchTab('dashboard')" id="nav-dashboard"><div class="nav-dot"></div><div class="nav-label">Overview</div></button>
-    <button class="nav-item" onclick="switchTab('expenses')"  id="nav-expenses"><div class="nav-dot"></div><div class="nav-label">Expenses</div></button>
-    <button class="nav-item" onclick="switchTab('received')"  id="nav-received"><div class="nav-dot"></div><div class="nav-label">Received</div></button>
-    <button class="nav-item" onclick="switchTab('analytics')" id="nav-analytics"><div class="nav-dot"></div><div class="nav-label">Analytics</div></button>
-    <button class="nav-item" onclick="switchTab('settings')"  id="nav-settings"><div class="nav-dot"></div><div class="nav-label">Settings</div></button>
-  </nav>
+    <!-- MOBILE BOTTOM NAV -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" onclick="switchTab('dashboard')" id="nav-dashboard"><div class="nav-dot"></div><div class="nav-label">Overview</div></button>
+      <button class="nav-item" onclick="switchTab('expenses')"  id="nav-expenses"><div class="nav-dot"></div><div class="nav-label">Expenses</div></button>
+      <button class="nav-item" onclick="switchTab('received')"  id="nav-received"><div class="nav-dot"></div><div class="nav-label">Received</div></button>
+      <button class="nav-item" onclick="switchTab('analytics')" id="nav-analytics"><div class="nav-dot"></div><div class="nav-label">Analytics</div></button>
+      <button class="nav-item" onclick="switchTab('settings')"  id="nav-settings"><div class="nav-dot"></div><div class="nav-label">Settings</div></button>
+    </nav>
 
-  <button class="fab" id="fab-btn" onclick="openAddModal()" style="display:none">+</button>
-</div>
+    <button class="fab" id="fab-btn" onclick="openAddModal()" style="display:none">+</button>
 
-</div><!-- end shell -->
+  </div><!-- end main-content -->
+</div><!-- end app -->
 
 <!-- TOAST -->
 <div id="toast"></div>
@@ -643,27 +727,26 @@ body.dark .badge-gift     { background: #3D1040; color: #F472B6; }
 </div>
 
 <!-- DELETE CONFIRM -->
-<div class="confirm-modal-overlay" id="del-modal">
-  <div class="confirm-modal">
+<div class="confirm-overlay" id="del-modal">
+  <div class="confirm-card">
     <div class="confirm-title">Delete entry?</div>
     <div class="confirm-sub">This cannot be undone.</div>
-    <input type="hidden" id="del-id" />
-    <input type="hidden" id="del-type" />
+    <input type="hidden" id="del-id" /><input type="hidden" id="del-type" />
     <div class="confirm-btns">
       <button class="confirm-cancel" onclick="closeConfirm('del-modal')">Cancel</button>
-      <button class="confirm-ok" style="background:var(--danger);color:#fff;" onclick="confirmDelete()">Delete</button>
+      <button class="confirm-ok" style="background:var(--expense-col);color:#fff" onclick="confirmDelete()">Delete</button>
     </div>
   </div>
 </div>
 
 <!-- SIGN OUT CONFIRM -->
-<div class="confirm-modal-overlay" id="signout-modal">
-  <div class="confirm-modal">
+<div class="confirm-overlay" id="signout-modal">
+  <div class="confirm-card">
     <div class="confirm-title">Sign out?</div>
     <div class="confirm-sub">You will need to sign back in to access your data.</div>
     <div class="confirm-btns">
       <button class="confirm-cancel" onclick="closeConfirm('signout-modal')">Cancel</button>
-      <button class="confirm-ok" style="background:var(--accent);color:#fff;" onclick="confirmSignOut()">Sign Out</button>
+      <button class="confirm-ok" style="background:var(--accent);color:#fff" onclick="confirmSignOut()">Sign Out</button>
     </div>
   </div>
 </div>
@@ -687,44 +770,42 @@ let currentUser = null;
 let expenses = [], received = [], categories = [], sources = [];
 let budget = 0, currentTab = 'dashboard', expMethod = 'cash', recType = 'transfer';
 let barChart = null, pieChart = null, dashBarChart = null, dashPieChart = null;
-
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const isDesktop = () => window.innerWidth >= 768;
 
 /* ── UTILS ───────────────────────────────────────────────── */
-const fmt      = n => 'PKR ' + Number(n).toLocaleString('en-PK',{minimumFractionDigits:0,maximumFractionDigits:0});
-const todayISO = () => new Date().toISOString().split('T')[0];
-const monthKey = iso => iso ? iso.slice(0,7) : '';
+const fmt         = n  => 'PKR ' + Number(n).toLocaleString('en-PK',{minimumFractionDigits:0,maximumFractionDigits:0});
+const todayISO    = () => new Date().toISOString().split('T')[0];
+const monthKey    = iso=> iso ? iso.slice(0,7) : '';
 const curMonthKey = () => { const n=new Date(); return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0'); };
-const monthLabel  = key => { if(!key) return '—'; const [y,m]=key.split('-'); return MONTHS[parseInt(m,10)-1]+' '+y; };
-const getMonthKeys = list => [...new Set(list.map(e=>monthKey(e.date)).filter(Boolean))].sort((a,b)=>b.localeCompare(a));
-const filterByMonth = (list,val) => (!val||val==='all') ? list : list.filter(e=>monthKey(e.date)===val);
-const formatDate = iso => { if(!iso) return '—'; const [y,m,d]=iso.split('-'); return `${parseInt(d,10)} ${MONTHS[parseInt(m,10)-1]} ${y}`; };
-const escHtml = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const monthLabel  = key=> { if(!key)return'—'; const[y,m]=key.split('-'); return MONTHS[parseInt(m,10)-1]+' '+y; };
+const getMonthKeys   = list => [...new Set(list.map(e=>monthKey(e.date)).filter(Boolean))].sort((a,b)=>b.localeCompare(a));
+const filterByMonth  = (list,val) => (!val||val==='all') ? list : list.filter(e=>monthKey(e.date)===val);
+const formatDate     = iso => { if(!iso)return'—'; const[y,m,d]=iso.split('-'); return `${parseInt(d,10)} ${MONTHS[parseInt(m,10)-1]} ${y}`; };
+const escHtml        = s  => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
 function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2200);
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
 }
 
 /* ── THEME ───────────────────────────────────────────────── */
 function initTheme() {
-  const isDark = localStorage.getItem('gh_dark') === 'true';
+  const isDark = localStorage.getItem('gh_dark')==='true';
   document.body.classList.toggle('dark', isDark);
-  const tog = document.getElementById('dark-toggle');
-  if (tog) tog.checked = isDark;
+  const tog=document.getElementById('dark-toggle');
+  if(tog) tog.checked=isDark;
 }
 function toggleDark(on) {
   document.body.classList.toggle('dark', on);
   localStorage.setItem('gh_dark', on);
-  if (currentTab === 'analytics') renderAnalytics();
-  if (currentTab === 'dashboard') renderDashboard();
+  if(currentTab==='analytics') renderAnalytics();
+  if(currentTab==='dashboard') renderDashboard();
 }
 
 /* ── AUTH ────────────────────────────────────────────────── */
-function signIn() {
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>alert('Sign-in failed: '+e.message));
-}
+function signIn() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>alert('Sign-in failed: '+e.message)); }
 function promptSignOut()  { openConfirm('signout-modal'); }
 function confirmSignOut() { closeConfirm('signout-modal'); auth.signOut(); }
 
@@ -733,8 +814,13 @@ auth.onAuthStateChanged(user => {
     currentUser = user;
     document.getElementById('auth-screen').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
-    document.getElementById('user-name-display').textContent  = user.displayName || 'User';
-    document.getElementById('user-email-display').textContent = user.email || '';
+    // user info
+    const name  = user.displayName || 'User';
+    const email = user.email || '';
+    document.getElementById('user-name-display').textContent  = name;
+    document.getElementById('user-email-display').textContent = email;
+    document.getElementById('sidebar-name').textContent  = name;
+    document.getElementById('sidebar-email').textContent = email;
     initTheme();
     loadAll();
   } else {
@@ -756,16 +842,16 @@ function loadAll() {
     expenses = snap.docs.map(d=>({id:d.id,...d.data()}));
     populateMonthFilter('exp-month-filter', expenses);
     rebuildAnalyticsFilter();
-    if (currentTab==='expenses')  renderExpenses();
-    if (currentTab==='analytics') renderAnalytics();
+    if(currentTab==='expenses')  renderExpenses();
+    if(currentTab==='analytics') renderAnalytics();
     renderDashboard();
   });
   recRef().orderBy('date','desc').onSnapshot(snap => {
     received = snap.docs.map(d=>({id:d.id,...d.data()}));
     populateMonthFilter('rec-month-filter', received);
     rebuildAnalyticsFilter();
-    if (currentTab==='received')  renderReceived();
-    if (currentTab==='analytics') renderAnalytics();
+    if(currentTab==='received')  renderReceived();
+    if(currentTab==='analytics') renderAnalytics();
     renderDashboard();
   });
   metaRef().onSnapshot(doc => {
@@ -773,145 +859,156 @@ function loadAll() {
     categories = data.categories || ['Groceries','Fuel','Utilities','School','Rent','Health','Clothing','Dining','Other'];
     sources    = data.sources    || [];
     budget     = data.budget     || 0;
-    document.getElementById('budget-input').value = budget || '';
+    document.getElementById('budget-input').value = budget||'';
     renderSettingsChips();
     renderDashboard();
-    if (currentTab==='analytics') renderAnalytics();
+    if(currentTab==='analytics') renderAnalytics();
   });
 }
 
 /* ── FILTERS ─────────────────────────────────────────────── */
 function populateMonthFilter(id, list) {
-  const sel = document.getElementById(id);
-  const cur = sel.value;
-  const keys = getMonthKeys(list);
-  sel.innerHTML = '<option value="all">All months</option>' + keys.map(k=>`<option value="${k}">${monthLabel(k)}</option>`).join('');
-  if (keys.includes(cur)) sel.value = cur;
+  const sel=document.getElementById(id), cur=sel.value, keys=getMonthKeys(list);
+  sel.innerHTML='<option value="all">All months</option>'+keys.map(k=>`<option value="${k}">${monthLabel(k)}</option>`).join('');
+  if(keys.includes(cur)) sel.value=cur;
+}
+function rebuildAnalyticsFilter() {
+  const sel=document.getElementById('analytics-month-filter'); if(!sel) return;
+  const prev=sel.value;
+  const merged=[...new Set([...getMonthKeys(expenses),...getMonthKeys(received)])].sort((a,b)=>b.localeCompare(a));
+  const cur=curMonthKey();
+  if(!merged.includes(cur)) merged.unshift(cur);
+  sel.innerHTML=merged.map(k=>`<option value="${k}">${monthLabel(k)}</option>`).join('');
+  sel.value=(prev&&merged.includes(prev))?prev:cur;
 }
 
-function rebuildAnalyticsFilter() {
-  const sel = document.getElementById('analytics-month-filter');
-  if (!sel) return;
-  const prev = sel.value;
-  const merged = [...new Set([...getMonthKeys(expenses),...getMonthKeys(received)])].sort((a,b)=>b.localeCompare(a));
-  const cur = curMonthKey();
-  if (!merged.includes(cur)) merged.unshift(cur);
-  sel.innerHTML = merged.map(k=>`<option value="${k}">${monthLabel(k)}</option>`).join('');
-  sel.value = (prev && merged.includes(prev)) ? prev : cur;
+/* ── CHART HELPERS ───────────────────────────────────────── */
+const chartDefaults = () => ({
+  isDark:     document.body.classList.contains('dark'),
+  gridColor:  document.body.classList.contains('dark') ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+  labelColor: document.body.classList.contains('dark') ? '#8A8A8E' : '#6B6B6B',
+  font:       { family: '-apple-system,BlinkMacSystemFont,Inter,sans-serif' }
+});
+const palette = ['#4A6FA5','#6B8FC4','#8FADD6','#3A5A8A','#2D4A72','#E05252','#2ECC71','#F0A500','#9B59B6','#1ABC9C'];
+
+function buildBarChart(canvasId, spentVal, budgetVal) {
+  const {isDark, gridColor, labelColor, font} = chartDefaults();
+  const ctx = document.getElementById(canvasId);
+  if (!ctx) return null;
+  return new Chart(ctx.getContext('2d'), {
+    type: 'bar',
+    data: { labels: ['Budget','Spent'], datasets: [{ data: [budgetVal, spentVal],
+      backgroundColor: [
+        isDark?'rgba(74,111,165,0.55)':'rgba(74,111,165,0.65)',
+        spentVal > budgetVal
+          ? (isDark?'rgba(224,82,82,0.70)':'rgba(224,82,82,0.80)')
+          : (isDark?'rgba(46,204,113,0.55)':'rgba(46,204,113,0.65)')
+      ],
+      borderRadius: 8, borderSkipped: false
+    }]},
+    options: { responsive:true, animation:{duration:300},
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>fmt(ctx.raw)}} },
+      scales:{
+        x:{ grid:{display:false}, ticks:{color:labelColor,font:{size:12,...font}} },
+        y:{ grid:{color:gridColor}, ticks:{color:labelColor,font:{size:11,...font}, callback:v=>v>=1000?'PKR '+(v/1000)+'k':'PKR '+v} }
+      }
+    }
+  });
+}
+
+function buildPieChart(canvasId, catTotals) {
+  const {isDark, labelColor, font} = chartDefaults();
+  const ctx = document.getElementById(canvasId);
+  if (!ctx) return null;
+  const labels = Object.keys(catTotals), data = Object.values(catTotals);
+  return new Chart(ctx.getContext('2d'), {
+    type: 'doughnut',
+    data: { labels, datasets:[{ data, backgroundColor:labels.map((_,i)=>palette[i%palette.length]), borderWidth:2, borderColor:isDark?'#1C1C1F':'#FFFFFF' }] },
+    options: { responsive:true, animation:{duration:300}, cutout:'55%',
+      plugins:{ legend:{position:'bottom',labels:{color:labelColor,padding:12,font:{size:12,...font}}}, tooltip:{callbacks:{label:ctx=>ctx.label+': '+fmt(ctx.raw)}} }
+    }
+  });
 }
 
 /* ── DASHBOARD ───────────────────────────────────────────── */
 function renderDashboard() {
-  const cur        = curMonthKey();
-  const mExp       = filterByMonth(expenses, cur);
-  const mRec       = filterByMonth(received, cur);
-  const spent      = mExp.reduce((s,e)=>s+Number(e.amount),0);
-  const recvd      = mRec.reduce((s,e)=>s+Number(e.amount),0);
-  const allSpent   = expenses.reduce((s,e)=>s+Number(e.amount),0);
-  const allRecvd   = received.reduce((s,e)=>s+Number(e.amount),0);
-  const pct        = budget>0 ? Math.min((spent/budget)*100,100) : 0;
-  const over       = budget>0 && spent>budget;
-  const warn       = budget>0 && pct>=80 && !over;
+  const cur      = curMonthKey();
+  const mExp     = filterByMonth(expenses, cur);
+  const spent    = mExp.reduce((s,e)=>s+Number(e.amount),0);
+  const allSpent = expenses.reduce((s,e)=>s+Number(e.amount),0);
+  const allRecvd = received.reduce((s,e)=>s+Number(e.amount),0);
+  const pct      = budget>0 ? Math.min((spent/budget)*100,100) : 0;
+  const over     = budget>0 && spent>budget;
+  const warn     = budget>0 && pct>=80 && !over;
 
-  const html = `
+  const catTotals = {};
+  mExp.forEach(e=>{ const c=e.category||'Other'; catTotals[c]=(catTotals[c]||0)+Number(e.amount); });
+  const hasCats = Object.keys(catTotals).length > 0;
+
+  if(dashBarChart){ dashBarChart.destroy(); dashBarChart=null; }
+  if(dashPieChart){ dashPieChart.destroy(); dashPieChart=null; }
+
+  document.getElementById('dash-content').innerHTML = `
     <div class="dash-lifetime">
       <div class="dash-lifetime-card">
-        <div class="dash-lifetime-label">Total Expenses</div>
+        <div class="dash-lifetime-label">All-time Expenses</div>
         <div class="dash-lifetime-value" style="color:var(--expense-col)">${fmt(allSpent)}</div>
       </div>
       <div class="dash-lifetime-card">
-        <div class="dash-lifetime-label">Total Received</div>
+        <div class="dash-lifetime-label">All-time Received</div>
         <div class="dash-lifetime-value" style="color:var(--received-col)">${fmt(allRecvd)}</div>
       </div>
     </div>
 
     <div class="dash-cur-month">
-      <div class="dash-cur-label">${monthLabel(cur)} — Spent</div>
+      <div class="dash-cur-label">${monthLabel(cur)} — Total Spent</div>
       <div class="dash-cur-amount">${fmt(spent)}</div>
-      <div class="dash-cur-sub">${budget>0 ? `Budget: ${fmt(budget)}` : 'No budget set — go to Settings'}</div>
+      <div class="dash-cur-sub">${budget>0?`Budget: ${fmt(budget)}`:'No budget set — go to Settings'}</div>
     </div>
 
-    ${budget>0 ? `
+    ${budget>0?`
     <div class="dash-budget-card">
       <div class="dash-budget-header">
         <div class="dash-budget-title">Budget used this month</div>
-        <div style="font-size:13px;font-weight:700;color:${over?'var(--expense-col)':warn?'#F39C12':'var(--received-col)'}">${Math.round(pct)}%</div>
+        <div style="font-size:13px;font-weight:700;color:${over?'var(--expense-col)':warn?'#F0A500':'var(--received-col)'}">${Math.round(pct)}%</div>
       </div>
       <div class="progress-track"><div class="progress-fill ${over?'over':warn?'warning':''}" style="width:${pct}%"></div></div>
       <div class="dash-budget-sub">${over?`Over by ${fmt(spent-budget)}`:`${fmt(budget-spent)} remaining`}</div>
-    </div>` : ''}
+    </div>`:''}
 
     <div class="dash-section-title">${monthLabel(cur)} — Charts</div>
-    <div class="dash-chart-card">
-      <div class="dash-chart-title">Budget vs Spent</div>
-      <canvas id="dash-bar-chart" height="140"></canvas>
+    <div class="dash-charts-row" id="dash-charts-row">
+      <div class="dash-chart-card">
+        <div class="dash-chart-title">Budget vs Spent</div>
+        <canvas id="dash-bar-chart" height="160"></canvas>
+      </div>
+      <div class="dash-chart-card" id="dash-pie-card">
+        <div class="dash-chart-title">Expenses by Category</div>
+        ${hasCats ? '<canvas id="dash-pie-chart" height="200"></canvas>' : '<div class="empty-state" style="padding:20px 0"><div class="empty-state-sub">No expenses this month yet.</div></div>'}
+      </div>
     </div>
-    <div class="dash-chart-card" id="dash-pie-wrapper">
-      <div class="dash-chart-title">Expenses by Category</div>
-      <canvas id="dash-pie-chart" height="200"></canvas>
-    </div>
-    <div style="height:8px"></div>
+    <div style="height:12px"></div>
   `;
 
-  document.getElementById('dash-content').innerHTML = html;
-
-  // destroy old chart instances
-  if (dashBarChart) { dashBarChart.destroy(); dashBarChart = null; }
-  if (dashPieChart) { dashPieChart.destroy(); dashPieChart = null; }
-
-  const isDark     = document.body.classList.contains('dark');
-  const gridColor  = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
-  const labelColor = isDark ? '#9A9A9A' : '#6B6B6B';
-  const font       = { family: '-apple-system,BlinkMacSystemFont,Inter,sans-serif' };
-
-  // bar
-  dashBarChart = new Chart(document.getElementById('dash-bar-chart').getContext('2d'), {
-    type: 'bar',
-    data: {
-      labels: ['Budget','Spent'],
-      datasets: [{ data: [budget, spent],
-        backgroundColor: [
-          isDark?'rgba(74,111,165,0.65)':'rgba(74,111,165,0.75)',
-          spent>budget?(isDark?'rgba(224,82,82,0.75)':'rgba(224,82,82,0.85)'):(isDark?'rgba(46,204,113,0.65)':'rgba(46,204,113,0.75)')
-        ],
-        borderRadius: 8, borderSkipped: false
-      }]
-    },
-    options: { responsive:true, animation:{duration:300}, plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmt(ctx.raw)}}},
-      scales:{ x:{grid:{display:false},ticks:{color:labelColor,font:{size:12,...font}}}, y:{grid:{color:gridColor},ticks:{color:labelColor,font:{size:11,...font},callback:v=>v>=1000?'PKR '+(v/1000)+'k':'PKR '+v}} }
-    }
-  });
-
-  // pie
-  const catTotals = {};
-  mExp.forEach(e=>{ const c=e.category||'Other'; catTotals[c]=(catTotals[c]||0)+Number(e.amount); });
-  const pLabels = Object.keys(catTotals);
-  const pData   = Object.values(catTotals);
-  const palette = ['#4A6FA5','#E05252','#2ECC71','#F39C12','#9B59B6','#1ABC9C','#E67E22','#3498DB','#E91E63','#607D8B'];
-
-  if (pLabels.length === 0) {
-    document.getElementById('dash-pie-wrapper').innerHTML =
-      `<div class="dash-chart-title">Expenses by Category</div><div class="empty-state" style="padding:24px 0"><div class="empty-state-sub">No expenses this month yet.</div></div>`;
-  } else {
-    dashPieChart = new Chart(document.getElementById('dash-pie-chart').getContext('2d'), {
-      type: 'doughnut',
-      data: { labels: pLabels, datasets:[{data:pData, backgroundColor:pLabels.map((_,i)=>palette[i%palette.length]), borderWidth:2, borderColor:isDark?'#1C1C1E':'#FFFFFF'}] },
-      options: { responsive:true, animation:{duration:300}, cutout:'55%',
-        plugins:{ legend:{position:'bottom',labels:{color:labelColor,padding:12,font:{size:12,...font}}}, tooltip:{callbacks:{label:ctx=>ctx.label+': '+fmt(ctx.raw)}} }
-      }
-    });
+  // on desktop, show charts side by side
+  if (isDesktop()) {
+    const row = document.getElementById('dash-charts-row');
+    if (row) { row.style.flexDirection='row'; row.style.padding='0'; }
   }
+
+  dashBarChart = buildBarChart('dash-bar-chart', spent, budget);
+  if (hasCats) dashPieChart = buildPieChart('dash-pie-chart', catTotals);
 }
 
 /* ── EXPENSES ────────────────────────────────────────────── */
 function renderExpenses() {
-  const filter = document.getElementById('exp-month-filter').value;
-  const list   = filterByMonth(expenses, filter);
-  const total  = list.reduce((s,e)=>s+Number(e.amount),0);
-  document.getElementById('exp-total').innerHTML = list.length>0 ? `${filter==='all'?'All time':monthLabel(filter)} &mdash; <span>${fmt(total)}</span>` : '';
-  const c = document.getElementById('exp-list');
-  if (!list.length) { c.innerHTML=`<div class="empty-state"><div class="empty-state-title">No expenses</div><div class="empty-state-sub">Tap + to add one.</div></div>`; return; }
-  c.innerHTML = list.map(e=>`
+  const filter=document.getElementById('exp-month-filter').value;
+  const list=filterByMonth(expenses,filter);
+  const total=list.reduce((s,e)=>s+Number(e.amount),0);
+  document.getElementById('exp-total').innerHTML=list.length?`${filter==='all'?'All time':monthLabel(filter)} &mdash; <span>${fmt(total)}</span>`:'';
+  const c=document.getElementById('exp-list');
+  if(!list.length){c.innerHTML=`<div class="empty-state"><div class="empty-state-title">No expenses</div><div class="empty-state-sub">Tap + to add one.</div></div>`;return;}
+  c.innerHTML=list.map(e=>`
     <div class="entry-card">
       <div class="entry-left">
         <div class="entry-cat">${escHtml(e.category||'Uncategorised')}</div>
@@ -930,13 +1027,13 @@ function renderExpenses() {
 
 /* ── RECEIVED ────────────────────────────────────────────── */
 function renderReceived() {
-  const filter = document.getElementById('rec-month-filter').value;
-  const list   = filterByMonth(received, filter);
-  const total  = list.reduce((s,e)=>s+Number(e.amount),0);
-  document.getElementById('rec-total').innerHTML = list.length>0 ? `${filter==='all'?'All time':monthLabel(filter)} &mdash; <span>${fmt(total)}</span>` : '';
-  const c = document.getElementById('rec-list');
-  if (!list.length) { c.innerHTML=`<div class="empty-state"><div class="empty-state-title">No entries</div><div class="empty-state-sub">Tap + to record money received.</div></div>`; return; }
-  c.innerHTML = list.map(e=>`
+  const filter=document.getElementById('rec-month-filter').value;
+  const list=filterByMonth(received,filter);
+  const total=list.reduce((s,e)=>s+Number(e.amount),0);
+  document.getElementById('rec-total').innerHTML=list.length?`${filter==='all'?'All time':monthLabel(filter)} &mdash; <span>${fmt(total)}</span>`:'';
+  const c=document.getElementById('rec-list');
+  if(!list.length){c.innerHTML=`<div class="empty-state"><div class="empty-state-title">No entries</div><div class="empty-state-sub">Tap + to record money received.</div></div>`;return;}
+  c.innerHTML=list.map(e=>`
     <div class="entry-card">
       <div class="entry-left">
         <div class="entry-cat">${escHtml(e.source||'Unknown source')}</div>
@@ -955,58 +1052,32 @@ function renderReceived() {
 
 /* ── ANALYTICS ───────────────────────────────────────────── */
 function renderAnalytics() {
-  const sel = document.getElementById('analytics-month-filter');
-  if (!sel) return;
-  const selMonth   = sel.value;
-  const monthExp   = filterByMonth(expenses, selMonth);
-  const totalSpent = monthExp.reduce((s,e)=>s+Number(e.amount),0);
-  document.getElementById('bar-chart-title').textContent = monthLabel(selMonth);
-
-  const isDark     = document.body.classList.contains('dark');
-  const gridColor  = isDark?'rgba(255,255,255,0.07)':'rgba(0,0,0,0.06)';
-  const labelColor = isDark?'#9A9A9A':'#6B6B6B';
-  const font       = { family:'-apple-system,BlinkMacSystemFont,Inter,sans-serif' };
-
-  if (barChart) { barChart.destroy(); barChart=null; }
-  barChart = new Chart(document.getElementById('bar-chart').getContext('2d'), {
-    type:'bar',
-    data:{ labels:['Budget','Spent'], datasets:[{ data:[budget,totalSpent],
-      backgroundColor:[isDark?'rgba(74,111,165,0.65)':'rgba(74,111,165,0.75)',totalSpent>budget?(isDark?'rgba(224,82,82,0.75)':'rgba(224,82,82,0.85)'):(isDark?'rgba(46,204,113,0.65)':'rgba(46,204,113,0.75)')],
-      borderRadius:8, borderSkipped:false }]
-    },
-    options:{ responsive:true, animation:{duration:300}, plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmt(ctx.raw)}}},
-      scales:{ x:{grid:{display:false},ticks:{color:labelColor,font:{size:12,...font}}}, y:{grid:{color:gridColor},ticks:{color:labelColor,font:{size:11,...font},callback:v=>v>=1000?'PKR '+(v/1000)+'k':'PKR '+v}} }
-    }
-  });
-
+  const sel=document.getElementById('analytics-month-filter'); if(!sel) return;
+  const selMonth=sel.value;
+  const monthExp=filterByMonth(expenses,selMonth);
+  const totalSpent=monthExp.reduce((s,e)=>s+Number(e.amount),0);
   const catTotals={};
   monthExp.forEach(e=>{ const c=e.category||'Other'; catTotals[c]=(catTotals[c]||0)+Number(e.amount); });
-  const pLabels=Object.keys(catTotals), pData=Object.values(catTotals);
-  const palette=['#4A6FA5','#E05252','#2ECC71','#F39C12','#9B59B6','#1ABC9C','#E67E22','#3498DB','#E91E63','#607D8B'];
+
+  if(barChart){barChart.destroy();barChart=null;}
+  barChart = buildBarChart('bar-chart', totalSpent, budget);
+
   const pieWrapper=document.getElementById('pie-wrapper');
-  if (pieChart) { pieChart.destroy(); pieChart=null; }
-  if (!pLabels.length) {
+  if(pieChart){pieChart.destroy();pieChart=null;}
+  if(!Object.keys(catTotals).length){
     pieWrapper.innerHTML=`<div class="empty-state"><div class="empty-state-title">No data</div><div class="empty-state-sub">No expenses for ${monthLabel(selMonth)}.</div></div>`;
     return;
   }
-  if (!pieWrapper.querySelector('canvas')) pieWrapper.innerHTML='<canvas id="pie-chart" height="220"></canvas>';
-  pieChart = new Chart(document.getElementById('pie-chart').getContext('2d'), {
-    type:'doughnut',
-    data:{ labels:pLabels, datasets:[{data:pData, backgroundColor:pLabels.map((_,i)=>palette[i%palette.length]), borderWidth:2, borderColor:isDark?'#1C1C1E':'#FFFFFF'}] },
-    options:{ responsive:true, animation:{duration:300}, cutout:'55%',
-      plugins:{ legend:{position:'bottom',labels:{color:labelColor,padding:12,font:{size:12,...font}}}, tooltip:{callbacks:{label:ctx=>ctx.label+': '+fmt(ctx.raw)}} }
-    }
-  });
+  if(!pieWrapper.querySelector('canvas')) pieWrapper.innerHTML='<canvas id="pie-chart" height="220"></canvas>';
+  pieChart = buildPieChart('pie-chart', catTotals);
 }
 
 /* ── SETTINGS ────────────────────────────────────────────── */
 function renderSettingsChips() {
-  document.getElementById('cat-chip-list').innerHTML = categories.map((c,i)=>`<div class="chip">${escHtml(c)}<button class="chip-del" onclick="removeCategory(${i})">×</button></div>`).join('');
-  document.getElementById('src-chip-list').innerHTML = sources.length===0
-    ? '<span style="font-size:13px;color:var(--text-muted)">No sources saved yet</span>'
-    : sources.map((s,i)=>`<div class="chip">${escHtml(s)}<button class="chip-del" onclick="removeSource(${i})">×</button></div>`).join('');
-  document.getElementById('exp-category').innerHTML = categories.map(c=>`<option value="${escHtml(c)}">${escHtml(c)}</option>`).join('');
-  document.getElementById('rec-source-select').innerHTML = '<option value="">Select saved source…</option>' + sources.map(s=>`<option value="${escHtml(s)}">${escHtml(s)}</option>`).join('');
+  document.getElementById('cat-chip-list').innerHTML=categories.map((c,i)=>`<div class="chip">${escHtml(c)}<button class="chip-del" onclick="removeCategory(${i})">×</button></div>`).join('');
+  document.getElementById('src-chip-list').innerHTML=sources.length===0?'<span style="font-size:13px;color:var(--text-muted)">No sources saved yet</span>':sources.map((s,i)=>`<div class="chip">${escHtml(s)}<button class="chip-del" onclick="removeSource(${i})">×</button></div>`).join('');
+  document.getElementById('exp-category').innerHTML=categories.map(c=>`<option value="${escHtml(c)}">${escHtml(c)}</option>`).join('');
+  document.getElementById('rec-source-select').innerHTML='<option value="">Select saved source…</option>'+sources.map(s=>`<option value="${escHtml(s)}">${escHtml(s)}</option>`).join('');
 }
 async function saveBudget()      { const v=parseFloat(document.getElementById('budget-input').value)||0; budget=v; await metaRef().set({budget:v},{merge:true}); showToast('Budget saved'); }
 async function addCategory()     { const inp=document.getElementById('new-cat-input'),v=inp.value.trim(); if(!v||categories.includes(v)){inp.value='';return;} categories.push(v); await metaRef().set({categories},{merge:true}); inp.value=''; }
@@ -1022,14 +1093,14 @@ function closeConfirm(id) { document.getElementById(id).classList.remove('open')
 
 function openAddModal() {
   renderSettingsChips();
-  if (currentTab==='expenses') {
+  if(currentTab==='expenses') {
     document.getElementById('exp-modal-title').textContent='Add Expense';
     document.getElementById('exp-edit-id').value='';
     document.getElementById('exp-amount').value='';
     document.getElementById('exp-note').value='';
     document.getElementById('exp-date').value=todayISO();
     selectMethod('cash'); openModal('exp-modal');
-  } else if (currentTab==='received') {
+  } else if(currentTab==='received') {
     document.getElementById('rec-modal-title').textContent='Add Received';
     document.getElementById('rec-edit-id').value='';
     document.getElementById('rec-amount').value='';
@@ -1092,11 +1163,10 @@ function editReceived(id) {
 }
 
 /* ── DELETE ──────────────────────────────────────────────── */
-function promptDelete(id,type) { document.getElementById('del-id').value=id; document.getElementById('del-type').value=type; openConfirm('del-modal'); }
+function promptDelete(id,type){ document.getElementById('del-id').value=id; document.getElementById('del-type').value=type; openConfirm('del-modal'); }
 async function confirmDelete() {
   const id=document.getElementById('del-id').value, type=document.getElementById('del-type').value;
-  if(type==='expense') await expRef().doc(id).delete();
-  else await recRef().doc(id).delete();
+  if(type==='expense') await expRef().doc(id).delete(); else await recRef().doc(id).delete();
   showToast('Entry deleted'); closeConfirm('del-modal');
 }
 
@@ -1105,19 +1175,23 @@ function switchTab(tab) {
   currentTab = tab;
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('tab-'+tab).classList.add('active');
-  document.getElementById('nav-'+tab).classList.add('active');
-  const fab = document.getElementById('fab-btn');
-  fab.style.display = (tab==='expenses'||tab==='received') ? 'flex' : 'none';
-  if (tab==='expenses')  renderExpenses();
-  if (tab==='received')  renderReceived();
-  if (tab==='dashboard') renderDashboard();
-  if (tab==='analytics') { rebuildAnalyticsFilter(); setTimeout(renderAnalytics,30); }
+  const mNav=document.getElementById('nav-'+tab);
+  const sNav=document.getElementById('snav-'+tab);
+  if(mNav) mNav.classList.add('active');
+  if(sNav) sNav.classList.add('active');
+  const fab=document.getElementById('fab-btn');
+  fab.style.display=(tab==='expenses'||tab==='received')?'flex':'none';
+  if(tab==='expenses')  renderExpenses();
+  if(tab==='received')  renderReceived();
+  if(tab==='dashboard') renderDashboard();
+  if(tab==='analytics') { rebuildAnalyticsFilter(); setTimeout(renderAnalytics,30); }
 }
 
-/* ── OVERLAY CLOSE ───────────────────────────────────────── */
+/* ── CLOSE ON OVERLAY TAP ────────────────────────────────── */
 document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModal(o.id);}));
-document.querySelectorAll('.confirm-modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeConfirm(o.id);}));
+document.querySelectorAll('.confirm-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeConfirm(o.id);}));
 
 initTheme();
 </script>
