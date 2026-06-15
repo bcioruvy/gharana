@@ -102,6 +102,19 @@ body{
   font-family:inherit;cursor:pointer;transition:border-color 0.2s;
 }
 .auth-btn:hover{border-color:var(--accent);}
+.auth-tabs{display:flex;margin-bottom:20px;border:1.5px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;}
+.auth-tab{flex:1;padding:10px;background:none;border:none;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;color:var(--text-muted);transition:background 0.15s,color 0.15s;}
+.auth-tab.active{background:var(--accent);color:#fff;}
+.auth-input{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text-primary);font-size:15px;font-family:inherit;transition:border-color 0.2s;margin-bottom:0;}
+.auth-input:focus{outline:none;border-color:var(--accent);background:var(--surface);}
+.auth-submit-btn{width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:4px;transition:background 0.15s;}
+.auth-submit-btn:hover{background:var(--accent-dim);}
+.auth-google-btn{width:100%;padding:13px;border:1.5px solid var(--border);border-radius:var(--radius);background:var(--surface2);color:var(--text-primary);font-size:15px;font-weight:500;font-family:inherit;cursor:pointer;transition:border-color 0.2s;}
+.auth-google-btn:hover{border-color:var(--accent);}
+.auth-divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--text-muted);font-size:13px;}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.auth-error{font-size:13px;color:var(--expense-col);margin-bottom:12px;min-height:18px;text-align:center;}
+
 
 /* ══════════════════════════════════════════════════════════
    APP SHELL
@@ -511,9 +524,26 @@ body.dark .badge-gift{background:rgba(224,82,82,0.18);}
   <div class="auth-card">
     <div class="auth-wordmark">gharana</div>
     <div class="auth-sub">household finance</div>
-    <button class="auth-btn" onclick="signIn()">Continue with Google</button>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-signin" onclick="switchAuthTab('signin')">Sign In</button>
+      <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Register</button>
+    </div>
+    <div id="auth-error" class="auth-error"></div>
+    <div class="form-group">
+      <input class="auth-input" type="email" id="auth-email" placeholder="Email address" />
+    </div>
+    <div class="form-group">
+      <input class="auth-input" type="password" id="auth-password" placeholder="Password" />
+    </div>
+    <div class="form-group" id="auth-confirm-wrap" style="display:none">
+      <input class="auth-input" type="password" id="auth-confirm" placeholder="Confirm password" />
+    </div>
+    <button class="auth-submit-btn" id="auth-submit-btn" onclick="handleEmailAuth()">Sign In</button>
+    <div class="auth-divider"><span>or</span></div>
+    <button class="auth-google-btn" onclick="signIn()">Continue with Google</button>
   </div>
 </div>
+
 
 <!-- APP -->
 <div id="app">
@@ -833,7 +863,47 @@ function toggleDark(on) {
 /* ══════════════════════════════════════════════════════════
    AUTH
 ══════════════════════════════════════════════════════════ */
-function signIn() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>alert('Sign-in failed: '+e.message)); }
+function signIn() {
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>showAuthError(e.message));
+}
+
+function switchAuthTab(tab) {
+  document.getElementById('tab-signin').classList.toggle('active', tab==='signin');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+  document.getElementById('auth-submit-btn').textContent = tab==='signin' ? 'Sign In' : 'Create Account';
+  document.getElementById('auth-confirm-wrap').style.display = tab==='register' ? 'block' : 'none';
+  document.getElementById('auth-error').textContent = '';
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  if (!el) return;
+  if (msg.includes('user-not-found')||msg.includes('wrong-password')||msg.includes('invalid-credential'))
+    msg = 'Incorrect email or password.';
+  else if (msg.includes('email-already-in-use'))
+    msg = 'An account with this email already exists.';
+  else if (msg.includes('weak-password'))
+    msg = 'Password must be at least 6 characters.';
+  else if (msg.includes('invalid-email'))
+    msg = 'Please enter a valid email address.';
+  el.textContent = msg;
+}
+
+function handleEmailAuth() {
+  const email    = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const isReg    = document.getElementById('tab-register').classList.contains('active');
+  document.getElementById('auth-error').textContent = '';
+  if (!email || !password) { showAuthError('Please fill in all fields.'); return; }
+  if (isReg) {
+    const confirm = document.getElementById('auth-confirm').value;
+    if (password !== confirm) { showAuthError('Passwords do not match.'); return; }
+    auth.createUserWithEmailAndPassword(email, password).catch(e=>showAuthError(e.message));
+  } else {
+    auth.signInWithEmailAndPassword(email, password).catch(e=>showAuthError(e.message));
+  }
+}
+
 function promptSignOut()  { openConfirm('signout-modal'); }
 function confirmSignOut() { closeConfirm('signout-modal'); auth.signOut(); }
 
