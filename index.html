@@ -1292,12 +1292,24 @@ function renderAnalytics() {
   const totalSpent= monthExp.reduce((s,e)=>s+Number(e.amount),0);
 
   if(barChart){barChart.destroy();barChart=null;}
+  const barWrap = document.getElementById('bar-chart');
+  if(barWrap){
+    const parent = barWrap.parentNode;
+    const newCanvas = document.createElement('canvas');
+    newCanvas.id = 'bar-chart';
+    newCanvas.height = 160;
+    parent.replaceChild(newCanvas, barWrap);
+  }
   barChart = buildBarChart('bar-chart', totalSpent, budget);
 
   const catTotals={};
   monthExp.forEach(e=>{const c=e.category||'Other';catTotals[c]=(catTotals[c]||0)+Number(e.amount);});
+
+  const pieWrap = document.getElementById('analytics-pie-wrap');
+  if(pieWrap) pieWrap.innerHTML='';
   buildSVGDonut(catTotals,'analytics-pie-wrap');
 }
+
 
 /* ══════════════════════════════════════════════════════════
    SETTINGS
