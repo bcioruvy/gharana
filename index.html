@@ -929,92 +929,83 @@ const PIE_PALETTE = [
 function buildSVGDonut(catTotals, containerId) {
   const container = document.getElementById(containerId);
   if (!container) return;
-
   const entries = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
   if (!entries.length) {
     container.innerHTML = `<div class="empty-state"><div class="empty-state-sub">No data to display.</div></div>`;
     return;
   }
-
   const total = entries.reduce((s,[,v])=>s+v, 0);
-  const W = 360, H = 300;
-  const cx = W/2, cy = H/2;
-  const R = 105, r = 65; // outer, inner radius
-  const shadowR = 112;   // shadow ring slightly bigger
-
-  // perspective tilt via CSS transform on the group
-  let slices = '';
-  let labels = '';
-  let angle  = -Math.PI / 2; // start at top
-
-  // shadow ring (depth illusion)
   const isDark = document.body.classList.contains('dark');
-  const shadowCol = isDark ? 'rgba(0,0,0,0.55)' : 'rgba(0,0,0,0.13)';
+  const W=260, H=260, cx=130, cy=130, R=110, r=68;
+  const PAL = [
+    ['#5B8FCC','#3A6FA5'],['#E06B6B','#C04040'],['#3DD68C','#1FAD63'],
+    ['#F5B731','#D4911A'],['#B07FE0','#8A50C0'],['#3EC9C9','#1FA5A5'],
+    ['#F0824E','#C85F2A'],['#6BA8E0','#3A7BC0'],['#E07AAD','#C04585'],
+    ['#7EC87E','#4FA54F']
+  ];
+
+  let slices = '', defs = '';
+  let angle = -Math.PI / 2;
 
   entries.forEach(([cat, val], i) => {
     const frac  = val / total;
     const sweep = frac * Math.PI * 2;
-    const endAngle = angle + sweep;
-    const [c1, c2] = PIE_PALETTE[i % PIE_PALETTE.length];
-    const gradId = `pg${i}`;
+    const end   = angle + sweep;
+    const [c1, c2] = PAL[i % PAL.length];
+    const gid = `pg${containerId}${i}`;
+    const fid = `pf${containerId}${i}`;
 
-    // arc path
-    const x1 = cx + R * Math.cos(angle),   y1 = cy + R * Math.sin(angle);
-    const x2 = cx + R * Math.cos(endAngle), y2 = cy + R * Math.sin(endAngle);
-    const x3 = cx + r * Math.cos(endAngle), y3 = cy + r * Math.sin(endAngle);
-    const x4 = cx + r * Math.cos(angle),    y4 = cy + r * Math.sin(angle);
+    const x1=cx+R*Math.cos(angle), y1=cy+R*Math.sin(angle);
+    const x2=cx+R*Math.cos(end),   y2=cy+R*Math.sin(end);
+    const x3=cx+r*Math.cos(end),   y3=cy+r*Math.sin(end);
+    const x4=cx+r*Math.cos(angle), y4=cy+r*Math.sin(angle);
     const lg = sweep > Math.PI ? 1 : 0;
+    const d  = `M${x1},${y1} A${R},${R} 0 ${lg},1 ${x2},${y2} L${x3},${y3} A${r},${r} 0 ${lg},0 ${x4},${y4} Z`;
 
-    const d = `M${x1},${y1} A${R},${R} 0 ${lg},1 ${x2},${y2} L${x3},${y3} A${r},${r} 0 ${lg},0 ${x4},${y4} Z`;
+    defs += `
+      <radialGradient id="${gid}" cx="50%" cy="35%" r="65%">
+        <stop offset="0%" stop-color="${c1}"/>
+        <stop offset="100%" stop-color="${c2}"/>
+      </radialGradient>
+      <filter id="${fid}" x="-10%" y="-10%" width="120%" height="120%">
+        <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="${c2}" flood-opacity="0.3"/>
+      </filter>`;
 
-    // mid angle for label line
-    const mid = angle + sweep / 2;
-    const lx1 = cx + (R+8)  * Math.cos(mid);
-    const ly1 = cy + (R+8)  * Math.sin(mid);
-    const lx2 = cx + (R+28) * Math.cos(mid);
-    const ly2 = cy + (R+28) * Math.sin(mid);
-    const lx3 = lx2 + (Math.cos(mid) > 0 ? 20 : -20);
-    const textAnchor = Math.cos(mid) > 0 ? 'start' : 'end';
-    const pct = Math.round(frac*100);
-
-    // only show label lines for slices > 4%
-    if (frac > 0.07) {
-      labels += `
-        <line x1="${lx1}" y1="${ly1}" x2="${lx2}" y2="${ly2}" stroke="${c1}" stroke-width="1.2" opacity="0.8"/>
-        <line x1="${lx2}" y1="${ly2}" x2="${lx3}" y2="${ly2}" stroke="${c1}" stroke-width="1.2" opacity="0.8"/>
-        <text x="${lx3 + (Math.cos(mid)>0?4:-4)}" y="${ly2-5}" font-size="11" font-family="-apple-system,sans-serif" font-weight="600" fill="${c1}" text-anchor="${textAnchor}">${pct}%</text>
-        <text x="${lx3 + (Math.cos(mid)>0?4:-4)}" y="${ly2+7}" font-size="10" font-family="-apple-system,sans-serif" fill="${isDark?'#9A9A9E':'#6B6B6B'}" text-anchor="${textAnchor}">${escHtml(cat)}</text>`;
-    }
-
-    slices += `
-      <defs>
-        <radialGradient id="${gradId}" cx="50%" cy="40%" r="60%">
-          <stop offset="0%" stop-color="${c1}"/>
-          <stop offset="100%" stop-color="${c2}"/>
-        </radialGradient>
-        <filter id="sf${i}" x="-5%" y="-5%" width="110%" height="115%">
-          <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="${c2}" flood-opacity="0.35"/>
-        </filter>
-      </defs>
-      <path d="${d}" fill="url(#${gradId})" filter="url(#sf${i})" stroke="${isDark?'#1C1C1F':'#fff'}" stroke-width="1.5"/>`;
-
-    angle = endAngle;
+    slices += `<path d="${d}" fill="url(#${gid})" filter="url(#${fid})" stroke="${isDark?'#1C1C1F':'#fff'}" stroke-width="2"/>`;
+    angle = end;
   });
 
-  // inner circle (hole)
-  const holeFill = isDark ? '#1C1C1F' : '#FFFFFF';
-  const totalLabel = fmt(total).replace('PKR ','');
+  const holeFill  = isDark ? '#1C1C1F' : '#FFFFFF';
+  const textFill  = isDark ? '#F0F0F0' : '#1A1A1A';
+  const mutedFill = isDark ? '#8A8A8E' : '#ABABAB';
+  const totalFmt  = Number(total).toLocaleString('en-PK',{minimumFractionDigits:0,maximumFractionDigits:0});
+
+  // legend rows
+  const legendRows = entries.map(([cat,val],i) => {
+    const [c1] = PAL[i % PAL.length];
+    const pct  = Math.round((val/total)*100);
+    const amt  = Number(val).toLocaleString('en-PK',{minimumFractionDigits:0,maximumFractionDigits:0});
+    return `<div style="display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid ${isDark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)'}">
+      <div style="width:10px;height:10px;border-radius:50%;background:${c1};flex-shrink:0"></div>
+      <div style="flex:1;font-size:13px;font-weight:500;color:${isDark?'#F0F0F0':'#1A1A1A'}">${cat}</div>
+      <div style="font-size:12px;color:${isDark?'#8A8A8E':'#6B6B6B'};margin-right:8px">${pct}%</div>
+      <div style="font-size:13px;font-weight:600;color:${isDark?'#F0F0F0':'#1A1A1A'}">PKR ${amt}</div>
+    </div>`;
+  }).join('');
 
   container.innerHTML = `
-    <svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:280px;filter:drop-shadow(0 8px 24px ${shadowCol});transform:perspective(600px) rotateX(12deg);transform-origin:center center;">
-      <ellipse cx="${cx}" cy="${cy+8}" rx="${shadowR}" ry="${shadowR*0.18}" fill="${shadowCol}" />
-      ${slices}
-      <circle cx="${cx}" cy="${cy}" r="${r-2}" fill="${holeFill}"/>
-      <text x="${cx}" y="${cy-8}" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" font-weight="600" fill="${isDark?'#8A8A8E':'#ABABAB'}" letter-spacing="0.05em">TOTAL</text>
-      <text x="${cx}" y="${cy+10}" text-anchor="middle" font-size="15" font-family="-apple-system,sans-serif" font-weight="700" fill="${isDark?'#F0F0F0':'#1A1A1A'}">${totalLabel}</text>
-      ${labels}
-    </svg>`;
+    <div style="display:flex;flex-direction:column;align-items:center;width:100%">
+      <svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="max-width:260px;filter:drop-shadow(0 12px 28px ${isDark?'rgba(0,0,0,0.5)':'rgba(0,0,0,0.12)'})">
+        <defs>${defs}</defs>
+        ${slices}
+        <circle cx="${cx}" cy="${cy}" r="${r-3}" fill="${holeFill}"/>
+        <text x="${cx}" y="${cy-10}" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" font-weight="600" fill="${mutedFill}" letter-spacing="0.08em">TOTAL</text>
+        <text x="${cx}" y="${cy+12}" text-anchor="middle" font-size="18" font-family="-apple-system,sans-serif" font-weight="700" fill="${textFill}">${totalFmt}</text>
+      </svg>
+      <div style="width:100%;margin-top:20px;padding:0 4px">${legendRows}</div>
+    </div>`;
 }
+
 
 /* ══════════════════════════════════════════════════════════
    BAR CHART (canvas with gradient)
