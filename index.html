@@ -1025,16 +1025,20 @@ function buildBarChart(canvasId, spentVal, budgetVal) {
   const font       = { family:'-apple-system,BlinkMacSystemFont,Inter,sans-serif' };
   const ctx        = document.getElementById(canvasId);
   if (!ctx) return null;
-  const c = ctx.getContext('2d');
 
-  // gradient for budget bar
-  const gBudget = c.createLinearGradient(0,0,0,200);
+  // force canvas to fill its container
+  ctx.style.width  = '100%';
+  ctx.style.display = 'block';
+  const containerWidth = ctx.parentNode ? ctx.parentNode.offsetWidth - 36 : 300;
+  ctx.width  = containerWidth;
+  ctx.height = 160;
+
+  const c = ctx.getContext('2d');
+  const gBudget = c.createLinearGradient(0,0,0,160);
   gBudget.addColorStop(0,'rgba(100,140,190,0.9)');
   gBudget.addColorStop(1,'rgba(60,100,160,0.7)');
-
-  // gradient for spent — green if under, red if over
   const over = spentVal > budgetVal && budgetVal > 0;
-  const gSpent = c.createLinearGradient(0,0,0,200);
+  const gSpent = c.createLinearGradient(0,0,0,160);
   if (over) {
     gSpent.addColorStop(0,'rgba(220,100,100,0.9)');
     gSpent.addColorStop(1,'rgba(180,50,50,0.75)');
@@ -1042,31 +1046,29 @@ function buildBarChart(canvasId, spentVal, budgetVal) {
     gSpent.addColorStop(0,'rgba(80,210,140,0.9)');
     gSpent.addColorStop(1,'rgba(30,160,80,0.75)');
   }
-
   return new Chart(c, {
     type:'bar',
     data:{ labels:['Budget','Spent'], datasets:[{ data:[budgetVal,spentVal],
-      backgroundColor:[gBudget, gSpent],
-      borderRadius:10, borderSkipped:false,
-      borderWidth:0,
+      backgroundColor:[gBudget,gSpent],
+      borderRadius:10, borderSkipped:false, borderWidth:0
     }]},
     options:{
-      responsive:true, animation:{duration:400},
+      responsive:false,
+      animation:{duration:400},
       plugins:{
         legend:{display:false},
         tooltip:{
-          backgroundColor: isDark?'rgba(30,30,35,0.95)':'rgba(255,255,255,0.95)',
-          titleColor: isDark?'#F0F0F0':'#1A1A1A',
-          bodyColor:  isDark?'#8A8A8E':'#6B6B6B',
-          borderColor: isDark?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.08)',
-          borderWidth:1,
-          cornerRadius:10,
+          backgroundColor:isDark?'rgba(30,30,35,0.95)':'rgba(255,255,255,0.95)',
+          titleColor:isDark?'#F0F0F0':'#1A1A1A',
+          bodyColor:isDark?'#8A8A8E':'#6B6B6B',
+          borderColor:isDark?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.08)',
+          borderWidth:1, cornerRadius:10,
           callbacks:{label:ctx=>fmt(ctx.raw)}
         }
       },
       scales:{
         x:{ grid:{display:false}, ticks:{color:labelColor,font:{size:12,...font}} },
-        y:{ grid:{color:gridColor,drawBorder:false}, ticks:{color:labelColor,font:{size:11,...font},callback:v=>v>=1000?'PKR '+(v/1000).toFixed(0)+'k':'PKR '+v} }
+        y:{ grid:{color:gridColor}, ticks:{color:labelColor,font:{size:11,...font},callback:v=>v>=1000?'PKR '+(v/1000).toFixed(0)+'k':'PKR '+v} }
       }
     }
   });
@@ -1440,7 +1442,7 @@ function switchTab(tab) {
   if(tab==='received')  renderReceived();
   if(tab==='dashboard') renderDashboard();
   if(tab==='summary')   renderSummary();
-  if(tab==='analytics') { rebuildAnalyticsFilter(); setTimeout(renderAnalytics,80); }
+  if(tab==='analytics') { rebuildAnalyticsFilter(); setTimeout(renderAnalytics,200); }
 }
 
 /* ── CLOSE ON OVERLAY TAP ────────────────────────────────── */
