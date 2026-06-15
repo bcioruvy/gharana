@@ -937,10 +937,10 @@ function buildSVGDonut(catTotals, containerId) {
   }
 
   const total = entries.reduce((s,[,v])=>s+v, 0);
-  const W = 280, H = 280;
+  const W = 360, H = 300;
   const cx = W/2, cy = H/2;
-  const R = 100, r = 62; // outer, inner radius
-  const shadowR = 106;   // shadow ring slightly bigger
+  const R = 105, r = 65; // outer, inner radius
+  const shadowR = 112;   // shadow ring slightly bigger
 
   // perspective tilt via CSS transform on the group
   let slices = '';
@@ -971,19 +971,19 @@ function buildSVGDonut(catTotals, containerId) {
     const mid = angle + sweep / 2;
     const lx1 = cx + (R+8)  * Math.cos(mid);
     const ly1 = cy + (R+8)  * Math.sin(mid);
-    const lx2 = cx + (R+22) * Math.cos(mid);
-    const ly2 = cy + (R+22) * Math.sin(mid);
-    const lx3 = lx2 + (Math.cos(mid) > 0 ? 14 : -14);
+    const lx2 = cx + (R+28) * Math.cos(mid);
+    const ly2 = cy + (R+28) * Math.sin(mid);
+    const lx3 = lx2 + (Math.cos(mid) > 0 ? 20 : -20);
     const textAnchor = Math.cos(mid) > 0 ? 'start' : 'end';
     const pct = Math.round(frac*100);
 
     // only show label lines for slices > 4%
-    if (frac > 0.04) {
+    if (frac > 0.07) {
       labels += `
         <line x1="${lx1}" y1="${ly1}" x2="${lx2}" y2="${ly2}" stroke="${c1}" stroke-width="1.2" opacity="0.8"/>
         <line x1="${lx2}" y1="${ly2}" x2="${lx3}" y2="${ly2}" stroke="${c1}" stroke-width="1.2" opacity="0.8"/>
-        <text x="${lx3 + (Math.cos(mid)>0?4:-4)}" y="${ly2-5}" font-size="9.5" font-family="-apple-system,sans-serif" font-weight="600" fill="${c1}" text-anchor="${textAnchor}">${pct}%</text>
-        <text x="${lx3 + (Math.cos(mid)>0?4:-4)}" y="${ly2+7}" font-size="8.5" font-family="-apple-system,sans-serif" fill="${isDark?'#9A9A9E':'#6B6B6B'}" text-anchor="${textAnchor}">${escHtml(cat)}</text>`;
+        <text x="${lx3 + (Math.cos(mid)>0?4:-4)}" y="${ly2-5}" font-size="11" font-family="-apple-system,sans-serif" font-weight="600" fill="${c1}" text-anchor="${textAnchor}">${pct}%</text>
+        <text x="${lx3 + (Math.cos(mid)>0?4:-4)}" y="${ly2+7}" font-size="10" font-family="-apple-system,sans-serif" fill="${isDark?'#9A9A9E':'#6B6B6B'}" text-anchor="${textAnchor}">${escHtml(cat)}</text>`;
     }
 
     slices += `
