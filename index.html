@@ -101,19 +101,6 @@ body{
   font-family:inherit;cursor:pointer;transition:border-color 0.2s;
 }
 .auth-btn:hover{border-color:var(--accent);}
-.auth-tabs{display:flex;margin-bottom:20px;border:1.5px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;}
-.auth-tab{flex:1;padding:10px;background:none;border:none;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;color:var(--text-muted);transition:background 0.15s,color 0.15s;}
-.auth-tab.active{background:var(--accent);color:#fff;}
-.auth-input{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text-primary);font-size:15px;font-family:inherit;transition:border-color 0.2s;margin-bottom:0;}
-.auth-input:focus{outline:none;border-color:var(--accent);background:var(--surface);}
-.auth-submit-btn{width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:4px;transition:background 0.15s;}
-.auth-submit-btn:hover{background:var(--accent-dim);}
-.auth-google-btn{width:100%;padding:13px;border:1.5px solid var(--border);border-radius:var(--radius);background:var(--surface2);color:var(--text-primary);font-size:15px;font-weight:500;font-family:inherit;cursor:pointer;transition:border-color 0.2s;}
-.auth-google-btn:hover{border-color:var(--accent);}
-.auth-divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--text-muted);font-size:13px;}
-.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border);}
-.auth-error{font-size:13px;color:var(--expense-col);margin-bottom:12px;min-height:18px;text-align:center;}
-
 
 /* ══════════════════════════════════════════════════════════
    APP SHELL
@@ -191,16 +178,14 @@ body{
 @media(min-width:768px){
   body{overflow:hidden;}
 
-#app{
+  #app{
     display:none;/* overridden by JS */
     flex-direction:row;
-    width:100%;
-    max-width:100%;
+    max-width:1100px;
     margin:0 auto;
     height:100dvh;
-    box-shadow:none;
+    box-shadow:0 0 80px rgba(0,0,0,0.5);
   }
-
 
   .sidebar{
     display:flex !important;
@@ -516,6 +501,57 @@ body.dark .badge-gift{background:rgba(224,82,82,0.18);}
 }
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+/* ══════════════════════════════════════════════════════════
+   PART 2 — CATEGORY BUDGETS
+══════════════════════════════════════════════════════════ */
+.cat-budget-list{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+.cat-budget-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm);}
+.cat-budget-name{flex:1;font-size:14px;font-weight:500;color:var(--text-primary);}
+.cat-budget-input{width:120px;padding:7px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text-primary);font-size:13px;font-family:inherit;text-align:right;transition:border-color 0.2s;}
+.cat-budget-input:focus{outline:none;border-color:var(--accent);}
+
+/* category budget alerts on dashboard */
+.cat-alert-section{margin:10px 20px 0;}
+.cat-alert-title{font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;}
+.cat-alert-card{background:var(--surface);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow-sm);margin-bottom:8px;}
+.cat-alert-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.cat-alert-name{font-size:14px;font-weight:600;color:var(--text-primary);}
+.cat-alert-pct{font-size:13px;font-weight:700;}
+.cat-alert-sub{font-size:12px;color:var(--text-muted);margin-top:6px;}
+@media(min-width:768px){
+  .cat-alert-section{margin:10px 32px 0;}
+}
+
+/* ══════════════════════════════════════════════════════════
+   PART 2 — RECURRING TRANSACTIONS
+══════════════════════════════════════════════════════════ */
+.recurring-list{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+.recurring-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;background:var(--surface2);border-radius:var(--radius-sm);}
+.recurring-info{flex:1;min-width:0;}
+.recurring-name{font-size:14px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.recurring-meta{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.recurring-amount{font-size:14px;font-weight:700;color:var(--expense-col);white-space:nowrap;}
+.recurring-del{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:18px;padding:2px 6px;border-radius:6px;transition:color 0.15s;}
+.recurring-del:hover{color:var(--expense-col);}
+
+/* recurring prompt */
+.recurring-prompt{margin:0 20px 12px;background:var(--accent-soft);border:1.5px solid rgba(74,111,165,0.25);border-radius:var(--radius);padding:14px 16px;}
+.recurring-prompt-title{font-size:14px;font-weight:600;color:var(--accent);margin-bottom:4px;}
+.recurring-prompt-sub{font-size:13px;color:var(--text-secondary);margin-bottom:12px;}
+.recurring-prompt-btns{display:flex;gap:8px;}
+.recurring-prompt-log{flex:1;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;}
+.recurring-prompt-skip{padding:10px 14px;background:none;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;color:var(--text-secondary);}
+@media(min-width:768px){
+  .recurring-prompt{margin:0 32px 12px;}
+}
+
+/* ══════════════════════════════════════════════════════════
+   PART 2 — EXPORT
+══════════════════════════════════════════════════════════ */
+.export-btns{display:flex;gap:10px;margin-top:4px;}
+.export-btn{flex:1;padding:12px;border:1.5px solid var(--accent);border-radius:var(--radius-sm);background:none;color:var(--accent);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:background 0.15s;}
+.export-btn:hover{background:var(--accent-soft);}
+
 </style>
 </head>
 <body>
@@ -525,29 +561,9 @@ body.dark .badge-gift{background:rgba(224,82,82,0.18);}
   <div class="auth-card">
     <div class="auth-wordmark">gharana</div>
     <div class="auth-sub">household finance</div>
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="tab-signin" onclick="switchAuthTab('signin')">Sign In</button>
-      <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Register</button>
-    </div>
-    <div id="auth-error" class="auth-error"></div>
-    <div class="form-group">
-      <input class="auth-input" type="email" id="auth-email" placeholder="Email address" />
-    </div>
-    <div class="form-group">
-      <input class="auth-input" type="password" id="auth-password" placeholder="Password" />
-    </div>
-    <div class="form-group" id="auth-confirm-wrap" style="display:none">
-      <input class="auth-input" type="password" id="auth-confirm" placeholder="Confirm password" />
-    </div>
-    <button class="auth-submit-btn" id="auth-submit-btn" onclick="handleEmailAuth()">Sign In</button>
-<div id="forgot-wrap" style="text-align:right;margin-top:8px;">
-  <button onclick="handleForgotPassword()" style="background:none;border:none;color:var(--accent);font-size:13px;font-family:inherit;cursor:pointer;padding:0;">Forgot password?</button>
-</div>
-    <div class="auth-divider"><span>or</span></div>
-    <button class="auth-google-btn" onclick="signIn()">Continue with Google</button>
+    <button class="auth-btn" onclick="signIn()">Continue with Google</button>
   </div>
 </div>
-
 
 <!-- APP -->
 <div id="app">
@@ -680,12 +696,38 @@ body.dark .badge-gift{background:rgba(224,82,82,0.18);}
           </div>
         </div>
         <div class="settings-section">
+          <div class="settings-section-title">Category Budgets</div>
+          <div class="settings-card" style="padding:16px">
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Set a monthly spending limit per category. Shown in Overview and Analytics.</div>
+            <div class="cat-budget-list" id="cat-budget-list"></div>
+            <button class="add-chip-btn" style="width:100%;margin-top:12px;padding:11px" onclick="saveCatBudgets()">Save Category Budgets</button>
+          </div>
+        </div>
+        <div class="settings-section">
+          <div class="settings-section-title">Recurring Transactions</div>
+          <div class="settings-card" style="padding:16px">
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Auto-log monthly expenses. You will be prompted to confirm when due.</div>
+            <div class="recurring-list" id="recurring-list"></div>
+            <button class="add-chip-btn" style="width:100%;margin-top:12px;padding:11px" onclick="openModal('recurring-modal')">Add Recurring Transaction</button>
+          </div>
+        </div>
+        <div class="settings-section">
           <div class="settings-section-title">Sources</div>
           <div class="settings-card" style="padding:16px">
             <div class="chip-list" id="src-chip-list"></div>
             <div class="add-chip-row">
               <input class="add-chip-input" type="text" id="new-src-input" placeholder="Add source…" />
               <button class="add-chip-btn" onclick="addSource()">Add</button>
+            </div>
+          </div>
+        </div>
+        <div class="settings-section">
+          <div class="settings-section-title">Export Data</div>
+          <div class="settings-card" style="padding:16px">
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Download all your data as a CSV file.</div>
+            <div class="export-btns">
+              <button class="export-btn" onclick="exportCSV('expenses')">Export Expenses</button>
+              <button class="export-btn" onclick="exportCSV('received')">Export Received</button>
             </div>
           </div>
         </div>
@@ -711,8 +753,8 @@ body.dark .badge-gift{background:rgba(224,82,82,0.18);}
       <button class="nav-item active" onclick="switchTab('dashboard')" id="nav-dashboard"><div class="nav-dot"></div><div class="nav-label">Overview</div></button>
       <button class="nav-item" onclick="switchTab('expenses')"  id="nav-expenses"><div class="nav-dot"></div><div class="nav-label">Expenses</div></button>
       <button class="nav-item" onclick="switchTab('received')"  id="nav-received"><div class="nav-dot"></div><div class="nav-label">Received</div></button>
-      <button class="nav-item" onclick="switchTab('summary')"   id="nav-summary"><div class="nav-dot"></div><div class="nav-label">Summary</div></button>
       <button class="nav-item" onclick="switchTab('analytics')" id="nav-analytics"><div class="nav-dot"></div><div class="nav-label">Analytics</div></button>
+      <button class="nav-item" onclick="switchTab('settings')"  id="nav-settings"><div class="nav-dot"></div><div class="nav-label">Settings</div></button>
     </nav>
 
     <button class="fab" id="fab-btn" onclick="openAddModal()" style="display:none">+</button>
@@ -769,7 +811,40 @@ body.dark .badge-gift{background:rgba(224,82,82,0.18);}
   </div>
 </div>
 
-<!-- DELETE CONFIRM -->
+<!-- RECURRING TRANSACTION MODAL -->
+<div class="modal-overlay" id="recurring-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add Recurring</div>
+      <button class="modal-close" onclick="closeModal('recurring-modal')">×</button>
+    </div>
+    <div class="form-group"><label class="form-label">Amount (PKR)</label><input class="form-input" type="number" id="rec-trx-amount" placeholder="0" inputmode="decimal" /></div>
+    <div class="form-group"><label class="form-label">Category</label><select class="form-select" id="rec-trx-category"></select></div>
+    <div class="form-group"><label class="form-label">Note</label><input class="form-input" type="text" id="rec-trx-note" placeholder="e.g. Monthly Rent" /></div>
+    <div class="form-group">
+      <label class="form-label">Method</label>
+      <div class="toggle-row">
+        <button class="toggle-btn selected" id="rec-trx-cash-btn" onclick="selectRecTrxMethod('cash')">Cash</button>
+        <button class="toggle-btn"          id="rec-trx-bank-btn" onclick="selectRecTrxMethod('bank')">Bank</button>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Day of Month</label><input class="form-input" type="number" id="rec-trx-day" placeholder="e.g. 1" min="1" max="28" inputmode="numeric" /></div>
+    <button class="submit-btn" onclick="saveRecurring()">Add Recurring Transaction</button>
+  </div>
+</div>
+
+<!-- RECURRING PROMPT MODAL -->
+<div class="confirm-overlay" id="recurring-prompt-modal">
+  <div class="confirm-card" style="max-width:380px">
+    <div class="confirm-title">Recurring transactions due</div>
+    <div class="confirm-sub" id="recurring-prompt-sub">—</div>
+    <div id="recurring-prompt-list" style="margin-bottom:20px;display:flex;flex-direction:column;gap:8px"></div>
+    <div class="confirm-btns">
+      <button class="confirm-cancel" onclick="skipRecurring()">Skip</button>
+      <button class="confirm-ok" style="background:var(--accent);color:#fff" onclick="logRecurring()">Log All</button>
+    </div>
+  </div>
+</div>
 <div class="confirm-overlay" id="del-modal">
   <div class="confirm-card">
     <div class="confirm-title">Delete entry?</div>
@@ -817,6 +892,8 @@ let currentUser = null;
 let expenses = [], received = [], categories = [], sources = [];
 let budget = 0, currentTab = 'dashboard', expMethod = 'cash', recType = 'transfer';
 let barChart = null;
+let catBudgets = {};
+let recurring  = [];
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const FULL_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -867,59 +944,7 @@ function toggleDark(on) {
 /* ══════════════════════════════════════════════════════════
    AUTH
 ══════════════════════════════════════════════════════════ */
-function signIn() {
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>showAuthError(e.message));
-}
-
-function handleForgotPassword() {
-  const email = document.getElementById('auth-email').value.trim();
-  if (!email) { showAuthError('Enter your email address first.'); return; }
-  auth.sendPasswordResetEmail(email)
-    .then(() => {
-      document.getElementById('auth-error').style.color = 'var(--received-col)';
-      document.getElementById('auth-error').textContent = 'Reset email sent — check your inbox.';
-    })
-    .catch(e => showAuthError(e.message));
-}
-
-function switchAuthTab(tab) {
-  document.getElementById('tab-signin').classList.toggle('active', tab==='signin');
-  document.getElementById('tab-register').classList.toggle('active', tab==='register');
-  document.getElementById('auth-submit-btn').textContent = tab==='signin' ? 'Sign In' : 'Create Account';
-  document.getElementById('auth-confirm-wrap').style.display = tab==='register' ? 'block' : 'none';
-  document.getElementById('auth-error').textContent = '';
-  document.getElementById('forgot-wrap').style.display = tab==='signin' ? 'block' : 'none';
-}
-
-function showAuthError(msg) {
-  const el = document.getElementById('auth-error');
-  if (!el) return;
-  if (msg.includes('user-not-found')||msg.includes('wrong-password')||msg.includes('invalid-credential'))
-    msg = 'Incorrect email or password.';
-  else if (msg.includes('email-already-in-use'))
-    msg = 'An account with this email already exists.';
-  else if (msg.includes('weak-password'))
-    msg = 'Password must be at least 6 characters.';
-  else if (msg.includes('invalid-email'))
-    msg = 'Please enter a valid email address.';
-  el.textContent = msg;
-}
-
-function handleEmailAuth() {
-  const email    = document.getElementById('auth-email').value.trim();
-  const password = document.getElementById('auth-password').value;
-  const isReg    = document.getElementById('tab-register').classList.contains('active');
-  document.getElementById('auth-error').textContent = '';
-  if (!email || !password) { showAuthError('Please fill in all fields.'); return; }
-  if (isReg) {
-    const confirm = document.getElementById('auth-confirm').value;
-    if (password !== confirm) { showAuthError('Passwords do not match.'); return; }
-    auth.createUserWithEmailAndPassword(email, password).catch(e=>showAuthError(e.message));
-  } else {
-    auth.signInWithEmailAndPassword(email, password).catch(e=>showAuthError(e.message));
-  }
-}
-
+function signIn() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>alert('Sign-in failed: '+e.message)); }
 function promptSignOut()  { openConfirm('signout-modal'); }
 function confirmSignOut() { closeConfirm('signout-modal'); auth.signOut(); }
 
@@ -977,10 +1002,14 @@ function loadAll() {
     categories = data.categories || ['Groceries','Fuel','Utilities','School','Rent','Health','Clothing','Dining','Other'];
     sources    = data.sources    || [];
     budget     = data.budget     || 0;
+    catBudgets = data.catBudgets || {};
+    recurring  = data.recurring  || [];
     document.getElementById('budget-input').value = budget||'';
     renderSettingsChips();
     renderDashboard();
     if(currentTab==='analytics') renderAnalytics();
+    if(currentTab==='settings')  renderCatBudgets();
+    checkRecurring();
   });
 }
 
@@ -1015,83 +1044,92 @@ const PIE_PALETTE = [
 function buildSVGDonut(catTotals, containerId) {
   const container = document.getElementById(containerId);
   if (!container) return;
+
   const entries = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
   if (!entries.length) {
     container.innerHTML = `<div class="empty-state"><div class="empty-state-sub">No data to display.</div></div>`;
     return;
   }
-  const total = entries.reduce((s,[,v])=>s+v, 0);
-  const isDark = document.body.classList.contains('dark');
-  const W=260, H=260, cx=130, cy=130, R=110, r=68;
-  const PAL = [
-    ['#5B8FCC','#3A6FA5'],['#E06B6B','#C04040'],['#3DD68C','#1FAD63'],
-    ['#F5B731','#D4911A'],['#B07FE0','#8A50C0'],['#3EC9C9','#1FA5A5'],
-    ['#F0824E','#C85F2A'],['#6BA8E0','#3A7BC0'],['#E07AAD','#C04585'],
-    ['#7EC87E','#4FA54F']
-  ];
 
-  let slices = '', defs = '';
-  let angle = -Math.PI / 2;
+  const total = entries.reduce((s,[,v])=>s+v, 0);
+  const W = 280, H = 280;
+  const cx = W/2, cy = H/2;
+  const R = 100, r = 62; // outer, inner radius
+  const shadowR = 106;   // shadow ring slightly bigger
+
+  // perspective tilt via CSS transform on the group
+  let slices = '';
+  let labels = '';
+  let angle  = -Math.PI / 2; // start at top
+
+  // shadow ring (depth illusion)
+  const isDark = document.body.classList.contains('dark');
+  const shadowCol = isDark ? 'rgba(0,0,0,0.55)' : 'rgba(0,0,0,0.13)';
 
   entries.forEach(([cat, val], i) => {
     const frac  = val / total;
     const sweep = frac * Math.PI * 2;
-    const end   = angle + sweep;
-    const [c1, c2] = PAL[i % PAL.length];
-    const gid = `pg${containerId}${i}`;
-    const fid = `pf${containerId}${i}`;
+    const endAngle = angle + sweep;
+    const [c1, c2] = PIE_PALETTE[i % PIE_PALETTE.length];
+    const gradId = `pg${i}`;
 
-    const x1=cx+R*Math.cos(angle), y1=cy+R*Math.sin(angle);
-    const x2=cx+R*Math.cos(end),   y2=cy+R*Math.sin(end);
-    const x3=cx+r*Math.cos(end),   y3=cy+r*Math.sin(end);
-    const x4=cx+r*Math.cos(angle), y4=cy+r*Math.sin(angle);
+    // arc path
+    const x1 = cx + R * Math.cos(angle),   y1 = cy + R * Math.sin(angle);
+    const x2 = cx + R * Math.cos(endAngle), y2 = cy + R * Math.sin(endAngle);
+    const x3 = cx + r * Math.cos(endAngle), y3 = cy + r * Math.sin(endAngle);
+    const x4 = cx + r * Math.cos(angle),    y4 = cy + r * Math.sin(angle);
     const lg = sweep > Math.PI ? 1 : 0;
-    const d  = `M${x1},${y1} A${R},${R} 0 ${lg},1 ${x2},${y2} L${x3},${y3} A${r},${r} 0 ${lg},0 ${x4},${y4} Z`;
 
-    defs += `
-      <radialGradient id="${gid}" cx="50%" cy="35%" r="65%">
-        <stop offset="0%" stop-color="${c1}"/>
-        <stop offset="100%" stop-color="${c2}"/>
-      </radialGradient>
-      <filter id="${fid}" x="-10%" y="-10%" width="120%" height="120%">
-        <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="${c2}" flood-opacity="0.3"/>
-      </filter>`;
+    const d = `M${x1},${y1} A${R},${R} 0 ${lg},1 ${x2},${y2} L${x3},${y3} A${r},${r} 0 ${lg},0 ${x4},${y4} Z`;
 
-    slices += `<path d="${d}" fill="url(#${gid})" filter="url(#${fid})" stroke="${isDark?'#1C1C1F':'#fff'}" stroke-width="2"/>`;
-    angle = end;
+    // mid angle for label line
+    const mid = angle + sweep / 2;
+    const lx1 = cx + (R+8)  * Math.cos(mid);
+    const ly1 = cy + (R+8)  * Math.sin(mid);
+    const lx2 = cx + (R+22) * Math.cos(mid);
+    const ly2 = cy + (R+22) * Math.sin(mid);
+    const lx3 = lx2 + (Math.cos(mid) > 0 ? 14 : -14);
+    const textAnchor = Math.cos(mid) > 0 ? 'start' : 'end';
+    const pct = Math.round(frac*100);
+
+    // only show label lines for slices > 4%
+    if (frac > 0.04) {
+      labels += `
+        <line x1="${lx1}" y1="${ly1}" x2="${lx2}" y2="${ly2}" stroke="${c1}" stroke-width="1.2" opacity="0.8"/>
+        <line x1="${lx2}" y1="${ly2}" x2="${lx3}" y2="${ly2}" stroke="${c1}" stroke-width="1.2" opacity="0.8"/>
+        <text x="${lx3 + (Math.cos(mid)>0?4:-4)}" y="${ly2-5}" font-size="9.5" font-family="-apple-system,sans-serif" font-weight="600" fill="${c1}" text-anchor="${textAnchor}">${pct}%</text>
+        <text x="${lx3 + (Math.cos(mid)>0?4:-4)}" y="${ly2+7}" font-size="8.5" font-family="-apple-system,sans-serif" fill="${isDark?'#9A9A9E':'#6B6B6B'}" text-anchor="${textAnchor}">${escHtml(cat)}</text>`;
+    }
+
+    slices += `
+      <defs>
+        <radialGradient id="${gradId}" cx="50%" cy="40%" r="60%">
+          <stop offset="0%" stop-color="${c1}"/>
+          <stop offset="100%" stop-color="${c2}"/>
+        </radialGradient>
+        <filter id="sf${i}" x="-5%" y="-5%" width="110%" height="115%">
+          <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="${c2}" flood-opacity="0.35"/>
+        </filter>
+      </defs>
+      <path d="${d}" fill="url(#${gradId})" filter="url(#sf${i})" stroke="${isDark?'#1C1C1F':'#fff'}" stroke-width="1.5"/>`;
+
+    angle = endAngle;
   });
 
-  const holeFill  = isDark ? '#1C1C1F' : '#FFFFFF';
-  const textFill  = isDark ? '#F0F0F0' : '#1A1A1A';
-  const mutedFill = isDark ? '#8A8A8E' : '#ABABAB';
-  const totalFmt  = Number(total).toLocaleString('en-PK',{minimumFractionDigits:0,maximumFractionDigits:0});
-
-  // legend rows
-  const legendRows = entries.map(([cat,val],i) => {
-    const [c1] = PAL[i % PAL.length];
-    const pct  = Math.round((val/total)*100);
-    const amt  = Number(val).toLocaleString('en-PK',{minimumFractionDigits:0,maximumFractionDigits:0});
-    return `<div style="display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid ${isDark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)'}">
-      <div style="width:10px;height:10px;border-radius:50%;background:${c1};flex-shrink:0"></div>
-      <div style="flex:1;font-size:13px;font-weight:500;color:${isDark?'#F0F0F0':'#1A1A1A'}">${cat}</div>
-      <div style="font-size:12px;color:${isDark?'#8A8A8E':'#6B6B6B'};margin-right:8px">${pct}%</div>
-      <div style="font-size:13px;font-weight:600;color:${isDark?'#F0F0F0':'#1A1A1A'}">PKR ${amt}</div>
-    </div>`;
-  }).join('');
+  // inner circle (hole)
+  const holeFill = isDark ? '#1C1C1F' : '#FFFFFF';
+  const totalLabel = fmt(total).replace('PKR ','');
 
   container.innerHTML = `
-    <div style="display:flex;flex-direction:column;align-items:center;width:100%">
-      <svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="max-width:260px;filter:drop-shadow(0 12px 28px ${isDark?'rgba(0,0,0,0.5)':'rgba(0,0,0,0.12)'})">
-        <defs>${defs}</defs>
-        ${slices}
-        <circle cx="${cx}" cy="${cy}" r="${r-3}" fill="${holeFill}"/>
-        <text x="${cx}" y="${cy-10}" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" font-weight="600" fill="${mutedFill}" letter-spacing="0.08em">TOTAL</text>
-        <text x="${cx}" y="${cy+12}" text-anchor="middle" font-size="18" font-family="-apple-system,sans-serif" font-weight="700" fill="${textFill}">${totalFmt}</text>
-      </svg>
-      <div style="width:100%;margin-top:20px;padding:0 4px">${legendRows}</div>
-    </div>`;
+    <svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:280px;filter:drop-shadow(0 8px 24px ${shadowCol});transform:perspective(600px) rotateX(12deg);transform-origin:center center;">
+      <ellipse cx="${cx}" cy="${cy+8}" rx="${shadowR}" ry="${shadowR*0.18}" fill="${shadowCol}" />
+      ${slices}
+      <circle cx="${cx}" cy="${cy}" r="${r-2}" fill="${holeFill}"/>
+      <text x="${cx}" y="${cy-8}" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" font-weight="600" fill="${isDark?'#8A8A8E':'#ABABAB'}" letter-spacing="0.05em">TOTAL</text>
+      <text x="${cx}" y="${cy+10}" text-anchor="middle" font-size="15" font-family="-apple-system,sans-serif" font-weight="700" fill="${isDark?'#F0F0F0':'#1A1A1A'}">${totalLabel}</text>
+      ${labels}
+    </svg>`;
 }
-
 
 /* ══════════════════════════════════════════════════════════
    BAR CHART (canvas with gradient)
@@ -1103,20 +1141,16 @@ function buildBarChart(canvasId, spentVal, budgetVal) {
   const font       = { family:'-apple-system,BlinkMacSystemFont,Inter,sans-serif' };
   const ctx        = document.getElementById(canvasId);
   if (!ctx) return null;
-
-  // force canvas to fill its container
-  ctx.style.width  = '100%';
-  ctx.style.display = 'block';
-  const containerWidth = ctx.parentNode ? ctx.parentNode.offsetWidth - 36 : 300;
-  ctx.width  = containerWidth;
-  ctx.height = 160;
-
   const c = ctx.getContext('2d');
-  const gBudget = c.createLinearGradient(0,0,0,160);
+
+  // gradient for budget bar
+  const gBudget = c.createLinearGradient(0,0,0,200);
   gBudget.addColorStop(0,'rgba(100,140,190,0.9)');
   gBudget.addColorStop(1,'rgba(60,100,160,0.7)');
+
+  // gradient for spent — green if under, red if over
   const over = spentVal > budgetVal && budgetVal > 0;
-  const gSpent = c.createLinearGradient(0,0,0,160);
+  const gSpent = c.createLinearGradient(0,0,0,200);
   if (over) {
     gSpent.addColorStop(0,'rgba(220,100,100,0.9)');
     gSpent.addColorStop(1,'rgba(180,50,50,0.75)');
@@ -1124,29 +1158,31 @@ function buildBarChart(canvasId, spentVal, budgetVal) {
     gSpent.addColorStop(0,'rgba(80,210,140,0.9)');
     gSpent.addColorStop(1,'rgba(30,160,80,0.75)');
   }
+
   return new Chart(c, {
     type:'bar',
     data:{ labels:['Budget','Spent'], datasets:[{ data:[budgetVal,spentVal],
-      backgroundColor:[gBudget,gSpent],
-      borderRadius:10, borderSkipped:false, borderWidth:0
+      backgroundColor:[gBudget, gSpent],
+      borderRadius:10, borderSkipped:false,
+      borderWidth:0,
     }]},
     options:{
-      responsive:false,
-      animation:{duration:400},
+      responsive:true, animation:{duration:400},
       plugins:{
         legend:{display:false},
         tooltip:{
-          backgroundColor:isDark?'rgba(30,30,35,0.95)':'rgba(255,255,255,0.95)',
-          titleColor:isDark?'#F0F0F0':'#1A1A1A',
-          bodyColor:isDark?'#8A8A8E':'#6B6B6B',
-          borderColor:isDark?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.08)',
-          borderWidth:1, cornerRadius:10,
+          backgroundColor: isDark?'rgba(30,30,35,0.95)':'rgba(255,255,255,0.95)',
+          titleColor: isDark?'#F0F0F0':'#1A1A1A',
+          bodyColor:  isDark?'#8A8A8E':'#6B6B6B',
+          borderColor: isDark?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.08)',
+          borderWidth:1,
+          cornerRadius:10,
           callbacks:{label:ctx=>fmt(ctx.raw)}
         }
       },
       scales:{
         x:{ grid:{display:false}, ticks:{color:labelColor,font:{size:12,...font}} },
-        y:{ grid:{color:gridColor}, ticks:{color:labelColor,font:{size:11,...font},callback:v=>v>=1000?'PKR '+(v/1000).toFixed(0)+'k':'PKR '+v} }
+        y:{ grid:{color:gridColor,drawBorder:false}, ticks:{color:labelColor,font:{size:11,...font},callback:v=>v>=1000?'PKR '+(v/1000).toFixed(0)+'k':'PKR '+v} }
       }
     }
   });
@@ -1216,6 +1252,39 @@ function renderDashboard() {
   buildBarChart('dash-bar-chart', spent, budget);
   if(hasCats) buildSVGDonut(catTotals,'dash-pie-wrap');
   else document.getElementById('dash-pie-wrap').innerHTML='<div class="empty-state" style="padding:16px 0"><div class="empty-state-sub">No expenses this month yet.</div></div>';
+
+  // category budget alerts
+  const alertCats = Object.entries(catBudgets).filter(([cat, lim]) => {
+    const spent = catTotals[cat] || 0;
+    return lim > 0 && spent > 0 && (spent / lim) >= 0.75;
+  }).sort((a,b) => {
+    const pctA = (catTotals[a[0]]||0) / a[1];
+    const pctB = (catTotals[b[0]]||0) / b[1];
+    return pctB - pctA;
+  });
+
+  if (alertCats.length) {
+    const alertHtml = alertCats.map(([cat, lim]) => {
+      const s    = catTotals[cat] || 0;
+      const pct  = Math.min((s / lim) * 100, 100);
+      const over = s > lim;
+      const warn = pct >= 80 && !over;
+      const col  = over ? 'var(--expense-col)' : warn ? '#F0A500' : 'var(--received-col)';
+      return `<div class="cat-alert-card">
+        <div class="cat-alert-row">
+          <div class="cat-alert-name">${escHtml(cat)}</div>
+          <div class="cat-alert-pct" style="color:${col}">${Math.round(pct)}%</div>
+        </div>
+        <div class="progress-track"><div class="progress-fill ${over?'over':warn?'warning':''}" style="width:${pct}%"></div></div>
+        <div class="cat-alert-sub">${over ? `Over by ${fmt(s-lim)}` : `${fmt(lim-s)} remaining of ${fmt(lim)}`}</div>
+      </div>`;
+    }).join('');
+
+    const alertSection = document.createElement('div');
+    alertSection.className = 'cat-alert-section';
+    alertSection.innerHTML = `<div class="cat-alert-title">Category Budget Alerts</div>${alertHtml}`;
+    document.getElementById('dash-content').appendChild(alertSection);
+  }
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1371,6 +1440,7 @@ function renderAnalytics() {
   const monthExp  = filterByMonth(expenses, selMonth);
   const totalSpent= monthExp.reduce((s,e)=>s+Number(e.amount),0);
 
+  // destroy old bar chart and replace canvas to avoid resize issues
   if(barChart){barChart.destroy();barChart=null;}
   const barWrap = document.getElementById('bar-chart');
   if(barWrap){
@@ -1385,11 +1455,11 @@ function renderAnalytics() {
   const catTotals={};
   monthExp.forEach(e=>{const c=e.category||'Other';catTotals[c]=(catTotals[c]||0)+Number(e.amount);});
 
+  // clear pie wrap before redrawing
   const pieWrap = document.getElementById('analytics-pie-wrap');
   if(pieWrap) pieWrap.innerHTML='';
   buildSVGDonut(catTotals,'analytics-pie-wrap');
 }
-
 
 /* ══════════════════════════════════════════════════════════
    SETTINGS
@@ -1401,7 +1471,180 @@ function renderSettingsChips() {
     :sources.map((s,i)=>`<div class="chip">${escHtml(s)}<button class="chip-del" onclick="removeSource(${i})">×</button></div>`).join('');
   document.getElementById('exp-category').innerHTML=categories.map(c=>`<option value="${escHtml(c)}">${escHtml(c)}</option>`).join('');
   document.getElementById('rec-source-select').innerHTML='<option value="">Select saved source…</option>'+sources.map(s=>`<option value="${escHtml(s)}">${escHtml(s)}</option>`).join('');
+  document.getElementById('rec-trx-category').innerHTML=categories.map(c=>`<option value="${escHtml(c)}">${escHtml(c)}</option>`).join('');
+  renderCatBudgets();
+  renderRecurringList();
 }
+
+function renderCatBudgets() {
+  const el = document.getElementById('cat-budget-list');
+  if (!el) return;
+  el.innerHTML = categories.map(c => {
+    const val = catBudgets[c] || '';
+    return `<div class="cat-budget-row">
+      <div class="cat-budget-name">${escHtml(c)}</div>
+      <input class="cat-budget-input" type="number" placeholder="No limit" value="${val}" data-cat="${escHtml(c)}" />
+    </div>`;
+  }).join('');
+}
+
+async function saveCatBudgets() {
+  const inputs = document.querySelectorAll('.cat-budget-input');
+  const newBudgets = {};
+  inputs.forEach(inp => {
+    const cat = inp.getAttribute('data-cat');
+    const val = parseFloat(inp.value);
+    if (cat && val > 0) newBudgets[cat] = val;
+  });
+  catBudgets = newBudgets;
+  await metaRef().set({ catBudgets }, { merge: true });
+  showToast('Category budgets saved');
+  renderDashboard();
+}
+
+function renderRecurringList() {
+  const el = document.getElementById('recurring-list');
+  if (!el) return;
+  if (!recurring.length) {
+    el.innerHTML = '<span style="font-size:13px;color:var(--text-muted)">No recurring transactions yet</span>';
+    return;
+  }
+  el.innerHTML = recurring.map((r,i) => `
+    <div class="recurring-item">
+      <div class="recurring-info">
+        <div class="recurring-name">${escHtml(r.note||r.category)}</div>
+        <div class="recurring-meta">${escHtml(r.category)} · Day ${r.dayOfMonth} every month · ${r.method||'cash'}</div>
+      </div>
+      <div class="recurring-amount">${fmt(r.amount)}</div>
+      <button class="recurring-del" onclick="removeRecurring(${i})">×</button>
+    </div>`).join('');
+}
+
+let recTrxMethod = 'cash';
+function selectRecTrxMethod(m) {
+  recTrxMethod = m;
+  document.getElementById('rec-trx-cash-btn').classList.toggle('selected', m==='cash');
+  document.getElementById('rec-trx-bank-btn').classList.toggle('selected', m==='bank');
+}
+
+async function saveRecurring() {
+  const amount = parseFloat(document.getElementById('rec-trx-amount').value);
+  if (!amount || amount <= 0) { alert('Enter a valid amount.'); return; }
+  const day = parseInt(document.getElementById('rec-trx-day').value);
+  if (!day || day < 1 || day > 28) { alert('Enter a day between 1 and 28.'); return; }
+  const entry = {
+    id: Date.now().toString(),
+    amount,
+    category: document.getElementById('rec-trx-category').value,
+    note:     document.getElementById('rec-trx-note').value.trim(),
+    method:   recTrxMethod,
+    dayOfMonth: day,
+    lastLogged: ''
+  };
+  recurring.push(entry);
+  await metaRef().set({ recurring }, { merge: true });
+  closeModal('recurring-modal');
+  showToast('Recurring transaction added');
+  renderRecurringList();
+}
+
+async function removeRecurring(i) {
+  recurring.splice(i, 1);
+  await metaRef().set({ recurring }, { merge: true });
+  renderRecurringList();
+  showToast('Removed');
+}
+
+/* ══════════════════════════════════════════════════════════
+   RECURRING — CHECK & LOG
+══════════════════════════════════════════════════════════ */
+let pendingRecurring = [];
+
+function checkRecurring() {
+  if (!recurring.length) return;
+  const today = new Date();
+  const todayDay = today.getDate();
+  const thisMonth = curMonthKey();
+  pendingRecurring = recurring.filter(r => {
+    if (r.dayOfMonth > todayDay) return false;
+    if (r.lastLogged && r.lastLogged >= thisMonth) return false;
+    return true;
+  });
+  if (!pendingRecurring.length) return;
+
+  // show prompt
+  document.getElementById('recurring-prompt-sub').textContent =
+    `${pendingRecurring.length} recurring transaction${pendingRecurring.length>1?'s are':' is'} due this month. Log them now?`;
+
+  document.getElementById('recurring-prompt-list').innerHTML = pendingRecurring.map(r => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--surface2);border-radius:var(--radius-sm)">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--text-primary)">${escHtml(r.note||r.category)}</div>
+        <div style="font-size:12px;color:var(--text-muted)">${escHtml(r.category)}</div>
+      </div>
+      <div style="font-size:14px;font-weight:700;color:var(--expense-col)">${fmt(r.amount)}</div>
+    </div>`).join('');
+
+  openConfirm('recurring-prompt-modal');
+}
+
+async function logRecurring() {
+  closeConfirm('recurring-prompt-modal');
+  const thisMonth = curMonthKey();
+  const [y, m] = thisMonth.split('-');
+  for (const r of pendingRecurring) {
+    const date = `${y}-${m}-${String(r.dayOfMonth).padStart(2,'0')}`;
+    await expRef().add({
+      amount:   r.amount,
+      category: r.category,
+      note:     r.note || r.category,
+      method:   r.method || 'cash',
+      date,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    // update lastLogged
+    const idx = recurring.findIndex(x => x.id === r.id);
+    if (idx > -1) recurring[idx].lastLogged = thisMonth;
+  }
+  await metaRef().set({ recurring }, { merge: true });
+  showToast(`${pendingRecurring.length} transaction${pendingRecurring.length>1?'s':''} logged`);
+  pendingRecurring = [];
+}
+
+function skipRecurring() {
+  closeConfirm('recurring-prompt-modal');
+  pendingRecurring = [];
+}
+
+/* ══════════════════════════════════════════════════════════
+   EXPORT CSV
+══════════════════════════════════════════════════════════ */
+function exportCSV(type) {
+  const data   = type === 'expenses' ? expenses : received;
+  const isExp  = type === 'expenses';
+  const header = isExp
+    ? ['Date','Category','Note','Amount (PKR)','Method']
+    : ['Date','Source','Note','Amount (PKR)','Type'];
+
+  const rows = data.map(e => isExp
+    ? [e.date||'', e.category||'', e.note||'', e.amount||0, e.method||'cash']
+    : [e.date||'', e.source||'',   e.note||'', e.amount||0, e.recType||'transfer']
+  );
+
+  const csv = [header, ...rows]
+    .map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(','))
+    .join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `gharana-${type}-${curMonthKey()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`${isExp?'Expenses':'Received'} exported`);
+}
+
 async function saveBudget()      { const v=parseFloat(document.getElementById('budget-input').value)||0; budget=v; await metaRef().set({budget:v},{merge:true}); showToast('Budget saved'); }
 async function addCategory()     { const inp=document.getElementById('new-cat-input'),v=inp.value.trim(); if(!v||categories.includes(v)){inp.value='';return;} categories.push(v); await metaRef().set({categories},{merge:true}); inp.value=''; }
 async function removeCategory(i) { categories.splice(i,1); await metaRef().set({categories},{merge:true}); }
@@ -1504,6 +1747,9 @@ async function confirmDelete(){
 /* ══════════════════════════════════════════════════════════
    TAB SWITCHING
 ══════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════
+   TAB SWITCHING
+══════════════════════════════════════════════════════════ */
 function switchTab(tab) {
   currentTab=tab;
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -1520,10 +1766,9 @@ function switchTab(tab) {
   if(tab==='received')  renderReceived();
   if(tab==='dashboard') renderDashboard();
   if(tab==='summary')   renderSummary();
-  if(tab==='analytics') { rebuildAnalyticsFilter(); setTimeout(renderAnalytics,200); }
+  if(tab==='settings')  { renderSettingsChips(); renderCatBudgets(); renderRecurringList(); }
+  if(tab==='analytics') { rebuildAnalyticsFilter(); setTimeout(renderAnalytics,80); }
 }
-
-/* ── CLOSE ON OVERLAY TAP ────────────────────────────────── */
 document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModal(o.id);}));
 document.querySelectorAll('.confirm-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeConfirm(o.id);}));
 
@@ -1531,5 +1776,3 @@ initTheme();
 </script>
 </body>
 </html>
-HTMLEOF
-echo "done"
