@@ -101,6 +101,18 @@ body{
   font-family:inherit;cursor:pointer;transition:border-color 0.2s;
 }
 .auth-btn:hover{border-color:var(--accent);}
+.auth-tabs{display:flex;margin-bottom:20px;border:1.5px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;}
+.auth-tab{flex:1;padding:10px;background:none;border:none;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;color:var(--text-muted);transition:background 0.15s,color 0.15s;}
+.auth-tab.active{background:var(--accent);color:#fff;}
+.auth-input{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text-primary);font-size:15px;font-family:inherit;transition:border-color 0.2s;margin-bottom:0;}
+.auth-input:focus{outline:none;border-color:var(--accent);background:var(--surface);}
+.auth-submit-btn{width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:4px;transition:background 0.15s;}
+.auth-submit-btn:hover{background:var(--accent-dim);}
+.auth-google-btn{width:100%;padding:13px;border:1.5px solid var(--border);border-radius:var(--radius);background:var(--surface2);color:var(--text-primary);font-size:15px;font-weight:500;font-family:inherit;cursor:pointer;transition:border-color 0.2s;}
+.auth-google-btn:hover{border-color:var(--accent);}
+.auth-divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--text-muted);font-size:13px;}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.auth-error{font-size:13px;color:var(--expense-col);margin-bottom:12px;min-height:18px;text-align:center;}
 
 /* ══════════════════════════════════════════════════════════
    APP SHELL
@@ -181,10 +193,11 @@ body{
   #app{
     display:none;/* overridden by JS */
     flex-direction:row;
-    max-width:1100px;
+    width:100%;
+    max-width:100%;
     margin:0 auto;
     height:100dvh;
-    box-shadow:0 0 80px rgba(0,0,0,0.5);
+    box-shadow:none;
   }
 
   .sidebar{
@@ -561,7 +574,26 @@ body.dark .badge-gift{background:rgba(224,82,82,0.18);}
   <div class="auth-card">
     <div class="auth-wordmark">gharana</div>
     <div class="auth-sub">household finance</div>
-    <button class="auth-btn" onclick="signIn()">Continue with Google</button>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-signin" onclick="switchAuthTab('signin')">Sign In</button>
+      <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Register</button>
+    </div>
+    <div id="auth-error" class="auth-error"></div>
+    <div class="form-group">
+      <input class="auth-input" type="email" id="auth-email" placeholder="Email address" />
+    </div>
+    <div class="form-group">
+      <input class="auth-input" type="password" id="auth-password" placeholder="Password" />
+    </div>
+    <div class="form-group" id="auth-confirm-wrap" style="display:none">
+      <input class="auth-input" type="password" id="auth-confirm" placeholder="Confirm password" />
+    </div>
+    <button class="auth-submit-btn" id="auth-submit-btn" onclick="handleEmailAuth()">Sign In</button>
+    <div id="forgot-wrap" style="text-align:right;margin-top:8px;">
+      <button onclick="handleForgotPassword()" style="background:none;border:none;color:var(--accent);font-size:13px;font-family:inherit;cursor:pointer;padding:0;">Forgot password?</button>
+    </div>
+    <div class="auth-divider"><span>or</span></div>
+    <button class="auth-google-btn" onclick="signIn()">Continue with Google</button>
   </div>
 </div>
 
@@ -944,7 +976,59 @@ function toggleDark(on) {
 /* ══════════════════════════════════════════════════════════
    AUTH
 ══════════════════════════════════════════════════════════ */
-function signIn() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>alert('Sign-in failed: '+e.message)); }
+function signIn() {
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>showAuthError(e.message));
+}
+
+function switchAuthTab(tab) {
+  document.getElementById('tab-signin').classList.toggle('active', tab==='signin');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+  document.getElementById('auth-submit-btn').textContent = tab==='signin' ? 'Sign In' : 'Create Account';
+  document.getElementById('auth-confirm-wrap').style.display = tab==='register' ? 'block' : 'none';
+  document.getElementById('auth-error').textContent = '';
+  document.getElementById('forgot-wrap').style.display = tab==='signin' ? 'block' : 'none';
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  if (!el) return;
+  if (msg.includes('user-not-found')||msg.includes('wrong-password')||msg.includes('invalid-credential'))
+    msg = 'Incorrect email or password.';
+  else if (msg.includes('email-already-in-use'))
+    msg = 'An account with this email already exists.';
+  else if (msg.includes('weak-password'))
+    msg = 'Password must be at least 6 characters.';
+  else if (msg.includes('invalid-email'))
+    msg = 'Please enter a valid email address.';
+  el.textContent = msg;
+}
+
+function handleEmailAuth() {
+  const email    = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const isReg    = document.getElementById('tab-register').classList.contains('active');
+  document.getElementById('auth-error').textContent = '';
+  if (!email || !password) { showAuthError('Please fill in all fields.'); return; }
+  if (isReg) {
+    const confirm = document.getElementById('auth-confirm').value;
+    if (password !== confirm) { showAuthError('Passwords do not match.'); return; }
+    auth.createUserWithEmailAndPassword(email, password).catch(e=>showAuthError(e.message));
+  } else {
+    auth.signInWithEmailAndPassword(email, password).catch(e=>showAuthError(e.message));
+  }
+}
+
+function handleForgotPassword() {
+  const email = document.getElementById('auth-email').value.trim();
+  if (!email) { showAuthError('Enter your email address first.'); return; }
+  auth.sendPasswordResetEmail(email)
+    .then(() => {
+      document.getElementById('auth-error').style.color = 'var(--received-col)';
+      document.getElementById('auth-error').textContent = 'Reset email sent — check your inbox.';
+    })
+    .catch(e => showAuthError(e.message));
+}
+
 function promptSignOut()  { openConfirm('signout-modal'); }
 function confirmSignOut() { closeConfirm('signout-modal'); auth.signOut(); }
 
@@ -1034,101 +1118,73 @@ function rebuildAnalyticsFilter() {
 /* ══════════════════════════════════════════════════════════
    SVG DONUT CHART — PREMIUM 3D-DEPTH EFFECT
 ══════════════════════════════════════════════════════════ */
-const PIE_PALETTE = [
-  ['#5B8FCC','#3A6FA5'],['#E06B6B','#C04040'],['#3DD68C','#1FAD63'],
-  ['#F5B731','#D4911A'],['#B07FE0','#8A50C0'],['#3EC9C9','#1FA5A5'],
-  ['#F0824E','#C85F2A'],['#6BA8E0','#3A7BC0'],['#E07AAD','#C04585'],
-  ['#7EC87E','#4FA54F']
-];
+const palette = ['#4A6FA5','#6B8FC4','#8FADD6','#3A5A8A','#2D4A72','#E05252','#2ECC71','#F0A500','#9B59B6','#1ABC9C'];
 
 function buildSVGDonut(catTotals, containerId) {
   const container = document.getElementById(containerId);
   if (!container) return;
-
   const entries = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
   if (!entries.length) {
     container.innerHTML = `<div class="empty-state"><div class="empty-state-sub">No data to display.</div></div>`;
     return;
   }
-
   const total = entries.reduce((s,[,v])=>s+v, 0);
-  const W = 280, H = 280;
-  const cx = W/2, cy = H/2;
-  const R = 100, r = 62; // outer, inner radius
-  const shadowR = 106;   // shadow ring slightly bigger
-
-  // perspective tilt via CSS transform on the group
-  let slices = '';
-  let labels = '';
-  let angle  = -Math.PI / 2; // start at top
-
-  // shadow ring (depth illusion)
   const isDark = document.body.classList.contains('dark');
-  const shadowCol = isDark ? 'rgba(0,0,0,0.55)' : 'rgba(0,0,0,0.13)';
-
-  entries.forEach(([cat, val], i) => {
-    const frac  = val / total;
-    const sweep = frac * Math.PI * 2;
-    const endAngle = angle + sweep;
-    const [c1, c2] = PIE_PALETTE[i % PIE_PALETTE.length];
-    const gradId = `pg${i}`;
-
-    // arc path
-    const x1 = cx + R * Math.cos(angle),   y1 = cy + R * Math.sin(angle);
-    const x2 = cx + R * Math.cos(endAngle), y2 = cy + R * Math.sin(endAngle);
-    const x3 = cx + r * Math.cos(endAngle), y3 = cy + r * Math.sin(endAngle);
-    const x4 = cx + r * Math.cos(angle),    y4 = cy + r * Math.sin(angle);
-    const lg = sweep > Math.PI ? 1 : 0;
-
-    const d = `M${x1},${y1} A${R},${R} 0 ${lg},1 ${x2},${y2} L${x3},${y3} A${r},${r} 0 ${lg},0 ${x4},${y4} Z`;
-
-    // mid angle for label line
-    const mid = angle + sweep / 2;
-    const lx1 = cx + (R+8)  * Math.cos(mid);
-    const ly1 = cy + (R+8)  * Math.sin(mid);
-    const lx2 = cx + (R+22) * Math.cos(mid);
-    const ly2 = cy + (R+22) * Math.sin(mid);
-    const lx3 = lx2 + (Math.cos(mid) > 0 ? 14 : -14);
-    const textAnchor = Math.cos(mid) > 0 ? 'start' : 'end';
-    const pct = Math.round(frac*100);
-
-    // only show label lines for slices > 4%
-    if (frac > 0.04) {
-      labels += `
-        <line x1="${lx1}" y1="${ly1}" x2="${lx2}" y2="${ly2}" stroke="${c1}" stroke-width="1.2" opacity="0.8"/>
-        <line x1="${lx2}" y1="${ly2}" x2="${lx3}" y2="${ly2}" stroke="${c1}" stroke-width="1.2" opacity="0.8"/>
-        <text x="${lx3 + (Math.cos(mid)>0?4:-4)}" y="${ly2-5}" font-size="9.5" font-family="-apple-system,sans-serif" font-weight="600" fill="${c1}" text-anchor="${textAnchor}">${pct}%</text>
-        <text x="${lx3 + (Math.cos(mid)>0?4:-4)}" y="${ly2+7}" font-size="8.5" font-family="-apple-system,sans-serif" fill="${isDark?'#9A9A9E':'#6B6B6B'}" text-anchor="${textAnchor}">${escHtml(cat)}</text>`;
-    }
-
-    slices += `
-      <defs>
-        <radialGradient id="${gradId}" cx="50%" cy="40%" r="60%">
-          <stop offset="0%" stop-color="${c1}"/>
-          <stop offset="100%" stop-color="${c2}"/>
-        </radialGradient>
-        <filter id="sf${i}" x="-5%" y="-5%" width="110%" height="115%">
-          <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="${c2}" flood-opacity="0.35"/>
-        </filter>
-      </defs>
-      <path d="${d}" fill="url(#${gradId})" filter="url(#sf${i})" stroke="${isDark?'#1C1C1F':'#fff'}" stroke-width="1.5"/>`;
-
-    angle = endAngle;
+  const W=260, H=260, cx=130, cy=130, R=110, r=68;
+  const PAL = [
+    ['#5B8FCC','#3A6FA5'],['#E06B6B','#C04040'],['#3DD68C','#1FAD63'],
+    ['#F5B731','#D4911A'],['#B07FE0','#8A50C0'],['#3EC9C9','#1FA5A5'],
+    ['#F0824E','#C85F2A'],['#6BA8E0','#3A7BC0'],['#E07AAD','#C04585'],
+    ['#7EC87E','#4FA54F']
+  ];
+  let slices='', defs='';
+  let angle = -Math.PI/2;
+  entries.forEach(([cat,val],i) => {
+    const frac=val/total, sweep=frac*Math.PI*2, end=angle+sweep;
+    const [c1,c2]=PAL[i%PAL.length];
+    const gid=`pg${containerId}${i}`, fid=`pf${containerId}${i}`;
+    const x1=cx+R*Math.cos(angle),y1=cy+R*Math.sin(angle);
+    const x2=cx+R*Math.cos(end),  y2=cy+R*Math.sin(end);
+    const x3=cx+r*Math.cos(end),  y3=cy+r*Math.sin(end);
+    const x4=cx+r*Math.cos(angle),y4=cy+r*Math.sin(angle);
+    const lg=sweep>Math.PI?1:0;
+    const d=`M${x1},${y1} A${R},${R} 0 ${lg},1 ${x2},${y2} L${x3},${y3} A${r},${r} 0 ${lg},0 ${x4},${y4} Z`;
+    defs+=`<radialGradient id="${gid}" cx="50%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="${c1}"/>
+      <stop offset="100%" stop-color="${c2}"/>
+    </radialGradient>
+    <filter id="${fid}" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="${c2}" flood-opacity="0.3"/>
+    </filter>`;
+    slices+=`<path d="${d}" fill="url(#${gid})" filter="url(#${fid})" stroke="${isDark?'#1C1C1F':'#fff'}" stroke-width="2"/>`;
+    angle=end;
   });
-
-  // inner circle (hole)
-  const holeFill = isDark ? '#1C1C1F' : '#FFFFFF';
-  const totalLabel = fmt(total).replace('PKR ','');
-
-  container.innerHTML = `
-    <svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:280px;filter:drop-shadow(0 8px 24px ${shadowCol});transform:perspective(600px) rotateX(12deg);transform-origin:center center;">
-      <ellipse cx="${cx}" cy="${cy+8}" rx="${shadowR}" ry="${shadowR*0.18}" fill="${shadowCol}" />
-      ${slices}
-      <circle cx="${cx}" cy="${cy}" r="${r-2}" fill="${holeFill}"/>
-      <text x="${cx}" y="${cy-8}" text-anchor="middle" font-size="11" font-family="-apple-system,sans-serif" font-weight="600" fill="${isDark?'#8A8A8E':'#ABABAB'}" letter-spacing="0.05em">TOTAL</text>
-      <text x="${cx}" y="${cy+10}" text-anchor="middle" font-size="15" font-family="-apple-system,sans-serif" font-weight="700" fill="${isDark?'#F0F0F0':'#1A1A1A'}">${totalLabel}</text>
-      ${labels}
-    </svg>`;
+  const holeFill =isDark?'#1C1C1F':'#FFFFFF';
+  const textFill =isDark?'#F0F0F0':'#1A1A1A';
+  const mutedFill=isDark?'#8A8A8E':'#ABABAB';
+  const totalFmt =Number(total).toLocaleString('en-PK',{minimumFractionDigits:0,maximumFractionDigits:0});
+  const legendRows=entries.map(([cat,val],i)=>{
+    const [c1]=PAL[i%PAL.length];
+    const pct=Math.round((val/total)*100);
+    const amt=Number(val).toLocaleString('en-PK',{minimumFractionDigits:0,maximumFractionDigits:0});
+    return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid ${isDark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)'}">
+      <div style="width:10px;height:10px;border-radius:50%;background:${c1};flex-shrink:0"></div>
+      <div style="flex:1;font-size:13px;font-weight:500;color:${textFill}">${escHtml(cat)}</div>
+      <div style="font-size:12px;color:${mutedFill};margin-right:8px">${pct}%</div>
+      <div style="font-size:13px;font-weight:600;color:${textFill}">PKR ${amt}</div>
+    </div>`;
+  }).join('');
+  container.innerHTML=`
+    <div style="display:flex;flex-direction:column;align-items:center;width:100%">
+      <svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="max-width:260px;filter:drop-shadow(0 12px 28px ${isDark?'rgba(0,0,0,0.5)':'rgba(0,0,0,0.12)'})">
+        <defs>${defs}</defs>
+        ${slices}
+        <circle cx="${cx}" cy="${cy}" r="${r-3}" fill="${holeFill}"/>
+        <text x="${cx}" y="${cy-10}" text-anchor="middle" font-size="10" font-family="-apple-system,sans-serif" font-weight="600" fill="${mutedFill}" letter-spacing="0.08em">TOTAL</text>
+        <text x="${cx}" y="${cy+12}" text-anchor="middle" font-size="18" font-family="-apple-system,sans-serif" font-weight="700" fill="${textFill}">${totalFmt}</text>
+      </svg>
+      <div style="width:100%;margin-top:20px;padding:0 4px">${legendRows}</div>
+    </div>`;
 }
 
 /* ══════════════════════════════════════════════════════════
